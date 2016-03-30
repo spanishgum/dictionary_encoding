@@ -1,1 +1,20 @@
-Dictionary encoding forthe  RDF storage model
+##Dictionary encoding 
+###RDF storage compression
+
+This is a research project I am working on. Typical RDF storage models implement some form of dictionary encoding to map strings to integers, which promotes efficient query processing and compression.
+
+Common implementations involve the use of two way hash maps, tree structures, arrays, etc.
+
+This project will explore the possibility of linking a B+ tree at the tails of the tree, to the tails of a Trie structure.
+
+The Trie is a simple implementation which provides public methods for search, insertion and removal of strings.
+
+The B+ is a templated implementation which provides public methods for search, insertion and removal of keys.
+
+Finally, the dictionary object will encapsulate the Trie and a B+ using integer keys, and handle linking the two data structures so that a user may call public mthods for insertion, removal, and of course the most important methods, locate and extract. Locate and extract are used to recover the mapped key for a string and vice versa.
+
+The primary aim of this project is to demonstrate large compression for massive RDF data sets such as DBpedia, which will fit fully in memory. This will likely come at the sacrifice of query processing, as a tree traversal has higher complexity than existing methods which use array access through integer keys. However, this model supports dynamic storage.
+
+Future work may include serializtion of the dictionary so that it may be operated on disk.
+
+
