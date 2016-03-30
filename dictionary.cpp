@@ -1,7 +1,7 @@
-#include "Dictionary.h"
+#include "dictionary.h"
 
 
-Dict Dict::Dict() {
+Dict::Dict() {
 
 }
 

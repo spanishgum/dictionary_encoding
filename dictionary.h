@@ -13,7 +13,7 @@ class Dict {
 
 		void insert(std::string, int);
 	public:
-		Dict Dict();
+		Dict();
 		~Dict();
 		void insert(std::string);
 		void remove(std::string);
