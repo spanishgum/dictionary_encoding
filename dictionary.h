@@ -8,7 +8,7 @@
 class Dict {
 	private:
 		Trie trie;
-		Bplus<int> bplus;
+		Bplus<int, void*> bplus;
 		int size;
 
 		void insert(std::string, int);

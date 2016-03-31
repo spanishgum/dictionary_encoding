@@ -3,50 +3,71 @@
 
 #include <cstdlib>
 
-template <typename T>
+#define CACHE_LINE_SIZE 256
+#define Bmax(a, b) ((a) > (b) ? (a) : (b))
+
+template <typename Tkey, typename Tdat>
 class Bplus {
 	private:
+		static const unsigned int 
+			max_slots = Bmax(8, CACHE_LINE_SIZE / (sizeof(Tkey) + sizeof(void *))),
+			min_slots = (max_slots / 2);
 
 		struct Node {
-			struct Node *parent;
-			T *keys;
+			Tkey *keys;
 			void **pointers;
 			unsigned int slots_used;
 			bool isleaf;
-			inline Node(int k_value, Node *p = NULL)
-				: parent(p) {
-				keys = new T[k_value];
-				pointers = new void *[k_value + 1];
+			inline Node(bool _isleaf) {
+				keys = new Tkey[max_slots];
+				pointers = new void *[max_slots + 1];
+				isleaf = _isleaf;
+			}
+			inline bool isfull() const {
+				return (slots_used == max_slots);
+			}
+			inline bool isfew() const {
+				return (slots_used <= min_slots);
+			}
+			inline bool isunderflow() const {
+				return (slots_used < min_slots);
 			}
 		};
 
 		struct innerNode : public Node {
 			inline innerNode()
-				: Node(1) {}
+				: Node(false) {}
 		};
 
 		struct leafNode : public Node {
 			struct leafNode *prev, *next;
 			inline leafNode()
-				: Node(0), prev(NULL), next(NULL) {}
-		};
+				: Node(true), prev(NULL), next(NULL) {}
 
-		int order, size;
+		};		
+		
 		Node *root;
 		leafNode *headLeaf, *tailLeaf;
 
 		Node *createNode();
+		inline int lower_key_idx(const Node *N, const Tkey& key) const {
+			return 0;
+		}
+		inline int upper_key_idx(const Node *N, const Tkey& key) const {
+			return 0;
+		}
+		
 		void merge(Node *, Node *);
 		void split(Node *);
 		void clear_recursive(Node *);
 		void traverse(Node *);
 
 	public:
-		Bplus(int = 3);
+		Bplus();
 		~Bplus();
-		Node *find();
-		Node *insert();
-		int remove(T);
+		Node *find(Tkey);
+		Node *insert(Tkey, Tdat);
+		int remove(Tkey);
 		void clear();
 		void show();
 };

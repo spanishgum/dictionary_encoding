@@ -2,58 +2,57 @@
 #include <iostream>
 
 
-template <typename T>
-Bplus<T>::Bplus(int B_order) {
-	if (B_order < 3) {
-		std::cerr << "Warning: B+ tree must have a K value of at least 3.\n";
-		throw;
-	}
-	this->order = B_order;
+template <typename Tkey, typename Tdat>
+Bplus<Tkey, Tdat>::Bplus() {
+	headLeaf = tailLeaf = NULL;
+	root = NULL;
 }
 
-template <typename T>
-Bplus<T>::~Bplus() {
+template <typename Tkey, typename Tdat>
+Bplus<Tkey, Tdat>::~Bplus() {
 	this->clear();
 }
 
 
-template <typename T>
-typename Bplus<T>::Node *Bplus<T>::createNode() {
+template <typename Tkey, typename Tdat>
+typename Bplus<Tkey, Tdat>::Node *Bplus<Tkey, Tdat>::createNode() {
 
 	return NULL;
 }
 
-template <typename T>
-void Bplus<T>::merge(Bplus<T>::Node *N, Bplus<T>::Node *M) {
+template <typename Tkey, typename Tdat>
+void Bplus<Tkey, Tdat>::merge(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tdat>::Node *M) {
 
 }
 
-template <typename T>
-void Bplus<T>::split(Bplus<T>::Node *N) {
+template <typename Tkey, typename Tdat>
+void Bplus<Tkey, Tdat>::split(Bplus<Tkey, Tdat>::Node *N) {
 
 }
 
-template <typename T>
-void Bplus<T>::clear_recursive(Bplus<T>::Node *N) {
+template <typename Tkey, typename Tdat>
+void Bplus<Tkey, Tdat>::clear_recursive(Bplus<Tkey, Tdat>::Node *N) {
 	if (!N)
 		return;
 	else if (N->isleaf) {
-		Bplus::leafNode *l = static_cast<Bplus::leafNode *>(N);
-		for (unsigned int slot = 0; slot < l->slots_used; ++slot) {
-			// delete slot
+		Bplus::leafNode *lNode = static_cast<Bplus::leafNode *>(N);
+		for (unsigned int slot = 0; slot < lNode->slots_used; ++slot) {
+			delete static_cast<Tkey*>(lNode->pointers[slot]);
 		}
+		delete static_cast<Bplus<Tkey, Tdat>::leafNode *>(N);
 	}
 	else {
-		Bplus::innerNode *i = static_cast<Bplus<T>::innerNode *>(N);
-		for (unsigned int slot = 0; slot < i->slots_used; ++slot) {
-			clear_recursive(static_cast<Bplus<T>::Node *>(i->pointers[slot]));
-			delete static_cast<Bplus<T>::Node *>(i->pointers[slot]);
+		Bplus::innerNode *iNode = static_cast<Bplus<Tkey, Tdat>::innerNode *>(N);
+		for (unsigned int slot = 0; slot < iNode->slots_used; ++slot) {
+			clear_recursive(static_cast<Bplus<Tkey, Tdat>::Node *>(iNode->pointers[slot]));
+			delete static_cast<Bplus<Tkey, Tdat>::Node *>(iNode->pointers[slot]);
 		}
+		delete static_cast<Bplus<Tkey, Tdat>::innerNode *>(N);
 	}
 }
 
-template <typename T>
-void Bplus<T>::traverse(Bplus<T>::Node *N) {
+template <typename Tkey, typename Tdat>
+void Bplus<Tkey, Tdat>::traverse(Bplus<Tkey, Tdat>::Node *N) {
 	if (N->isleaf) {
 		for (int key = 0; key < N->slots_used; ++key)
 			std::cout << N->pointers << " ";
@@ -61,36 +60,43 @@ void Bplus<T>::traverse(Bplus<T>::Node *N) {
 	}
 	else
 		for (int key = 0; key < N->slots_used; ++key)
-			traverse(static_cast<Bplus<T>::Node *>(N->pointers[key]));
+			traverse(static_cast<Bplus<Tkey, Tdat>::Node *>(N->pointers[key]));
 }
 
-template <typename T>
-typename Bplus<T>::Node * Bplus<T>::find() {
+template <typename Tkey, typename Tdat>
+typename Bplus<Tkey, Tdat>::Node * Bplus<Tkey, Tdat>::find(Tkey key) {
+	Node *N = this->root;
+	if (!N) return NULL;
+	while (!N->isleaf) {
+		int slot = lower_key_idx(N, key);
+		N = static_cast<Bplus<Tkey, Tdat>::Node *>(N->pointers[slot]);
+	}
+	// int slot = lower_key_idx(N, key);
+	// return N->pointers[slot];
+	return NULL;
+}
+
+template <typename Tkey, typename Tdat>
+typename Bplus<Tkey, Tdat>::Node *Bplus<Tkey, Tdat>::insert(Tkey, Tdat) {
 
 	return NULL;
 }
 
-template <typename T>
-typename Bplus<T>::Node *Bplus<T>::insert() {
-
-	return NULL;
-}
-
-template <typename T>
-int Bplus<T>::remove(T) {
+template <typename Tkey, typename Tdat>
+int Bplus<Tkey, Tdat>::remove(Tkey) {
 
 	return 0;
 }
 
-template <typename T>
-void Bplus<T>::clear() {
+template <typename Tkey, typename Tdat>
+void Bplus<Tkey, Tdat>::clear() {
 	clear_recursive(this->root);
 }
 
-template <typename T>
-void Bplus<T>::show() {
+template <typename Tkey, typename Tdat>
+void Bplus<Tkey, Tdat>::show() {
 	this->traverse(this->root);
 }
 
-
-template class Bplus<int>;
+typedef void* data;
+template class Bplus<int, data>;
