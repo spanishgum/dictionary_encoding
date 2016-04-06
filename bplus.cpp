@@ -52,6 +52,18 @@ void Bplus<Tkey, Tdat>::clear_recursive(Bplus<Tkey, Tdat>::Node *N) {
 }
 
 template <typename Tkey, typename Tdat>
+typename Bplus<Tkey, Tdat>::Node * Bplus<Tkey, Tdat>::insert_recursive(Node *N, Tkey key, Tdat dat) {
+	if (!N->isleaf) {
+		innerNode *iNode = static_cast<innerNode *>(N);
+		Node *newNode = NULL;
+		int slot = lower_key_idx(N);
+	}
+	else {
+		
+	}
+}
+
+template <typename Tkey, typename Tdat>
 void Bplus<Tkey, Tdat>::traverse(Bplus<Tkey, Tdat>::Node *N) {
 	if (N->isleaf) {
 		for (int key = 0; key < N->slots_used; ++key)
@@ -77,8 +89,12 @@ typename Bplus<Tkey, Tdat>::Node * Bplus<Tkey, Tdat>::find(Tkey key) {
 }
 
 template <typename Tkey, typename Tdat>
-typename Bplus<Tkey, Tdat>::Node *Bplus<Tkey, Tdat>::insert(Tkey, Tdat) {
-
+typename Bplus<Tkey, Tdat>::Node *Bplus<Tkey, Tdat>::insert(Tkey key, Tdat dat) {
+	Node *N = this->root;
+	if (N == NULL) {
+		this->root = this->headLeaf = this->tailLeaf = new Node(true);
+	}
+	insert_recursive(N);
 	return NULL;
 }
 

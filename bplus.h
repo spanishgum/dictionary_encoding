@@ -47,7 +47,7 @@ class Bplus {
 		};		
 		
 		Node *root;
-		leafNode *headLeaf, *tailLeaf;
+		Node *headLeaf, *tailLeaf;
 
 		Node *createNode();
 		inline int lower_key_idx(const Node *N, const Tkey& key) const {
@@ -60,6 +60,7 @@ class Bplus {
 		void merge(Node *, Node *);
 		void split(Node *);
 		void clear_recursive(Node *);
+		Node *insert_recursive(Node *, Tkey, Tdat);
 		void traverse(Node *);
 
 	public:
