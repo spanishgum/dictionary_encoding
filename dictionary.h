@@ -5,10 +5,13 @@
 #include "trie.h"
 #include "bplus.h"
 
-class Dict {
+class Dict : public Trie, public Bplus<int, Trie::Node> {
+	typedef Trie::Node TNode;
+	typedef Bplus::Node BNode;
+
 	private:
 		Trie trie;
-		Bplus<int, void*> bplus;
+		Bplus<int, Trie::Node> bplus;
 		int size;
 
 		void insert(std::string, int);

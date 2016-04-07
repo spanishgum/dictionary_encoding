@@ -7,7 +7,7 @@
 #include <iostream>
 
 class Trie {
-	private:
+	public:
 		struct Node {
 			Node *parent;
 			std::list<Node *> children;
@@ -27,7 +27,6 @@ class Trie {
 		void clear_recursive(Node *);
 		void traverse(Node *, std::string);
 
-	protected:
 		Node *find(std::string);
 		Node *insert(std::string, unsigned int);
 
@@ -40,5 +39,6 @@ class Trie {
 		void clear();
 		void show();
 };
+
 
 #endif

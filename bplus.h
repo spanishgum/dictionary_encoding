@@ -8,7 +8,7 @@
 
 template <typename Tkey, typename Tdat>
 class Bplus {
-	private:
+	protected:
 		static const unsigned int 
 			max_slots = Bmax(8, CACHE_LINE_SIZE / (sizeof(Tkey) + sizeof(void *))),
 			min_slots = (max_slots / 2);
@@ -22,6 +22,12 @@ class Bplus {
 				keys = new Tkey[max_slots];
 				pointers = new void *[max_slots + 1];
 				isleaf = _isleaf;
+				slots_used = 0;
+				for (int i = 0; i < max_slots; ++i) {
+					keys[i] = Tkey();
+					pointers[i] = NULL;
+				}
+				pointers[max_slots] = NULL;
 			}
 			inline bool isfull() const {
 				return (slots_used == max_slots);
@@ -65,7 +71,7 @@ class Bplus {
 		void split(innerNode *, Tkey *, Node **, unsigned int);
 		void split(leafNode *, Tkey *, Node **);
 		void clear_recursive(Node *);
-		Node *insert_recursive(Node *, const Tkey&, const Tdat&, Tkey *, Node **);
+		Node *insert_recursive(Node *, const Tkey&, Tdat&, Tkey *, Node **);
 		void traverse(Node *);
 
 	public:
