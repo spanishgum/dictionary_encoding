@@ -51,23 +51,28 @@ class Bplus {
 
 		Node *createNode();
 		inline int lower_key_idx(const Node *N, const Tkey& key) const {
-			return 0;
+			int lo = 0;
+			while (lo < N->slots_used && (N->keys[lo] < key)) ++lo;
+			return lo;
 		}
 		inline int upper_key_idx(const Node *N, const Tkey& key) const {
-			return 0;
+			int lo = N->slots_used;
+			while (lo < N->slots_used && (N->keys[lo] <= key)) ++lo;
+			return lo;
 		}
-		
+
 		void merge(Node *, Node *);
-		void split(Node *);
+		void split(innerNode *, Tkey *, Node **, unsigned int);
+		void split(leafNode *, Tkey *, Node **);
 		void clear_recursive(Node *);
-		Node *insert_recursive(Node *, Tkey, Tdat);
+		Node *insert_recursive(Node *, const Tkey&, const Tdat&, Tkey *, Node **);
 		void traverse(Node *);
 
 	public:
 		Bplus();
 		~Bplus();
 		Node *find(Tkey);
-		Node *insert(Tkey, Tdat);
+		Node *insert(Tkey &, Tdat &);
 		int remove(Tkey);
 		void clear();
 		void show();
