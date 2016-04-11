@@ -81,9 +81,9 @@ Trie::Node *Trie::insert(std::string s, unsigned int id) {
 	return N;
 }
 
-void Trie::insert(std::string s) {
-	this->insert(s, 0);
-}
+// void Trie::insert(std::string s) {
+	// this->insert(s, 0);
+// }
 
 void Trie::remove(std::string s) {
 	Trie::Node *N = this->find(s), *_N;
@@ -105,6 +105,19 @@ bool Trie::contains(std::string s) {
 	if (N != NULL && N != this->root)
 		if (N->isWord) return true;
 	return false;
+}
+
+std::string Trie::getString(Node * N) {
+	if (N == NULL) return "";
+	if (!N->isWord) return "";
+	std::string reverse = "";
+	while (N != this->root) {
+		reverse += N->letter;
+		N = N->parent;
+	}
+	for (unsigned int i = 0; i < 1 + reverse.length() / 2; ++i)
+		std::swap(reverse[i], reverse[reverse.length() - 1 - i]);
+	return reverse;
 }
 
 void Trie::clear() {

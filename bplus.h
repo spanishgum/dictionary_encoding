@@ -77,7 +77,7 @@ class Bplus {
 	public:
 		Bplus();
 		~Bplus();
-		Node *find(Tkey);
+		Tdat *find(Tkey);
 		Node *insert(Tkey &, Tdat &);
 		int remove(Tkey);
 		void clear();

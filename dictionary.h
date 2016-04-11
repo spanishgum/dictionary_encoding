@@ -5,24 +5,24 @@
 #include "trie.h"
 #include "bplus.h"
 
-class Dict : public Trie, public Bplus<int, Trie::Node> {
+class Dict : public Trie, public Bplus<unsigned int, Trie::Node> {
 	typedef Trie::Node TNode;
 	typedef Bplus::Node BNode;
-
+	
 	private:
 		Trie trie;
-		Bplus<int, Trie::Node> bplus;
-		int size;
+		Bplus<unsigned int, Trie::Node> bplus;
+		unsigned int size;
 
-		void insert(std::string, int);
+		void insert(std::string, unsigned int);
 	public:
 		Dict();
 		~Dict();
-		void insert(std::string);
+		unsigned int insert(std::string);
 		void remove(std::string);
-		void remove(int);
+		void remove(unsigned int);
 		int locate(std::string);
-		std::string extract(int);
+		std::string extract(unsigned int);
 		void clear();
 		void show();
 };

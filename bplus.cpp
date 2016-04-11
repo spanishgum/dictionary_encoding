@@ -161,15 +161,15 @@ void Bplus<Tkey, Tdat>::traverse(Bplus<Tkey, Tdat>::Node *N) {
 }
 
 template <typename Tkey, typename Tdat>
-typename Bplus<Tkey, Tdat>::Node * Bplus<Tkey, Tdat>::find(Tkey key) {
+Tdat * Bplus<Tkey, Tdat>::find(Tkey key) {
 	Node *N = this->root;
 	if (!N) return NULL;
 	while (!N->isleaf) {
 		int slot = lower_key_idx(N, key);
 		N = static_cast<Bplus<Tkey, Tdat>::Node *>(N->pointers[slot]);
 	}
-	// int slot = lower_key_idx(N, key);
-	// return N->pointers[slot];
+	int slot = lower_key_idx(N, key);
+	return static_cast<Tdat *>(N->pointers[slot]);
 	return NULL;
 }
 
@@ -211,3 +211,4 @@ void Bplus<Tkey, Tdat>::show() {
 // template class Bplus<int, data>;
 template class Bplus<int, int>;
 template class Bplus<int, Trie::Node>;
+template class Bplus<unsigned int, Trie::Node>;

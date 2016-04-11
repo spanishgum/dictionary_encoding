@@ -33,7 +33,8 @@ class Trie {
 	public:
 		Trie();
 		~Trie();
-		void insert(std::string);
+		// void insert(std::string);
+		std::string getString(Node *);
 		void remove(std::string);
 		bool contains(std::string);
 		void clear();
