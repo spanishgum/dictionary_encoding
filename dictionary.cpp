@@ -27,9 +27,10 @@ void Dict::remove(unsigned int) {
 
 }
 
-int Dict::locate(std::string) {
-
-	return 0;
+int Dict::locate(std::string s) {
+	TNode *tn = this->trie.find(s);
+	if (tn == NULL) return -1;
+	return tn->id;
 }
 
 std::string Dict::extract(unsigned int id) {
@@ -43,7 +44,7 @@ void Dict::clear() {
 }
 
 void Dict::show() {
-
+	this->bplus.show();
 }
 
 

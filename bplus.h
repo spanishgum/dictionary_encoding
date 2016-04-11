@@ -10,7 +10,8 @@ template <typename Tkey, typename Tdat>
 class Bplus {
 	protected:
 		static const unsigned int 
-			max_slots = Bmax(8, CACHE_LINE_SIZE / (sizeof(Tkey) + sizeof(void *))),
+			// max_slots = Bmax(8, CACHE_LINE_SIZE / (sizeof(Tkey) + sizeof(void *))),
+			max_slots = 4,
 			min_slots = (max_slots / 2);
 
 		struct Node {
@@ -49,7 +50,6 @@ class Bplus {
 			struct leafNode *prev, *next;
 			inline leafNode()
 				: Node(true), prev(NULL), next(NULL) {}
-
 		};		
 		
 		Node *root;

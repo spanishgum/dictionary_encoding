@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "dictionary.h"
-
+#include <vector>
 using namespace std;
 
 int main() {
@@ -16,12 +16,25 @@ int main() {
 	
 	Dict *D = new Dict();
 	
+	vector<unsigned int> V;
 	string line, testFileName = "/usr/share/dict/cracklib-small";
 	ifstream ifs;
 	ifs.open(testFileName);
 	while (getline(ifs, line)) {
-		cout << D->insert(line) << "\n";
+		V.push_back(D->insert(line));
+		// D->show();
+		// cin.get();
 	}
+	ifs.close();
+	ifs.open(testFileName);
+	int idx = 0, test_idx;
+	bool test_result = 1;
+	while (getline(ifs, line)) {
+		test_idx = D->locate(line);
+		test_result &= (test_idx == idx);
+		++idx;
+	}
+	cout << "Test result: " << test_result << "\n";
 	
 	// unsigned int hello = D->insert("hello");
 	// unsigned int world = D->insert("world");

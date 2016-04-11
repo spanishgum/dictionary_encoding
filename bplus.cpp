@@ -48,12 +48,15 @@ void Bplus<Tkey, Tdat>::split(Bplus<Tkey, Tdat>::leafNode *lNode, Tkey *_newKey,
 	leafNode *newLeaf = new leafNode();
 	newLeaf->slots_used = lNode->slots_used - mid;
 	newLeaf->next = lNode->next;
+	
 	if (newLeaf->next == NULL) {
 		this->tailLeaf = newLeaf;
 	}
 	else {
+		std::cout << newLeaf->next;
 		newLeaf->next->prev = newLeaf;
 	}
+	
 	std::copy(lNode->keys + mid, lNode->keys + lNode->slots_used,
 		newLeaf->keys);
 	std::copy(lNode->pointers + mid, lNode->pointers + lNode->slots_used,
@@ -90,20 +93,38 @@ void Bplus<Tkey, Tdat>::clear_recursive(Bplus<Tkey, Tdat>::Node *N) {
 
 template <typename Tkey, typename Tdat>
 typename Bplus<Tkey, Tdat>::Node * Bplus<Tkey, Tdat>::insert_recursive(Node *N, const Tkey &key, Tdat &dat, Tkey *splitKey, Node **splitNode) {
+
+	// std::cout << "Recursively inserting " << key << "\n";
+
+	// if (N == NULL) std::cout << "FOUND PROBLEM\n";
+	
 	if (!N->isleaf) {
 		innerNode *iNode = static_cast<innerNode *>(N);
 		Tkey newKey = Tkey();
 		Node *newChild = NULL;
 		int slot = lower_key_idx(N, key);
+		
+		// std::cout << "Root was not leaf. Inserting into slot " << slot << " with " << N->slots_used << " slots used\n";
+		
 		Node *recurse_result = insert_recursive(static_cast<Node *>(iNode->pointers[slot]), key, dat, &newKey, &newChild);
+		
 		if (newChild) {
+			
+			// std::cout << "We have new child\n";
+			
 			if (iNode->isfull()) {
+				
+				// std::cout << "New child inner node is full\n";
+				
 				split(iNode, splitKey, splitNode, slot);
 				if (slot == iNode->slots_used + 1 && iNode->slots_used < (*splitNode)->slots_used) {
 					innerNode *splitInner = static_cast<innerNode *>(*splitNode);
 					iNode->keys[iNode->slots_used] = *splitKey;
 					iNode->pointers[iNode->slots_used + 1] = splitInner->pointers[0];
 					iNode->slots_used++;
+					splitInner->pointers[0] = newChild;
+					*splitKey = newKey;
+					return recurse_result;
 				}
 				else if (slot >= iNode->slots_used + 1) {
 					slot -= iNode->slots_used + 1;
@@ -112,21 +133,32 @@ typename Bplus<Tkey, Tdat>::Node * Bplus<Tkey, Tdat>::insert_recursive(Node *N, 
 			}
 			std::copy_backward(iNode->keys + slot, iNode->keys + iNode->slots_used,
 				iNode->keys + iNode->slots_used + 1);
-			std::copy_backward(iNode->keys + slot, iNode->keys + iNode->slots_used + 1,
-				iNode->keys + iNode->slots_used + 2);
+			std::copy_backward(iNode->pointers + slot, iNode->pointers + iNode->slots_used + 1,
+				iNode->pointers + iNode->slots_used + 2);
 			iNode->keys[slot] = newKey;
 			iNode->pointers[slot + 1] = newChild;
 			iNode->slots_used++;
 		}
+		
 		return recurse_result;
 	}
 	else {
+		// std::cerr << "test\n";
 		leafNode *lNode = static_cast<leafNode *>(N);
+		// std::cout << "test\n";
 		int slot = lower_key_idx(N, key);
+		// std::cout << "Inserting into leaf at slot " << slot << "\n";
 		if (slot < lNode->slots_used && key == lNode->keys[slot])
 			return lNode;
+			
+			
 		if (lNode->isfull()) {
+
+			// std::cout << "splitting leaf node . . .\n";
+
 			split(lNode, splitKey, splitNode);
+			
+			
 			if (slot >= lNode->slots_used) {
 				slot -= lNode->slots_used;
 				lNode = static_cast<leafNode *>(*splitNode);
@@ -134,8 +166,8 @@ typename Bplus<Tkey, Tdat>::Node * Bplus<Tkey, Tdat>::insert_recursive(Node *N, 
 		}
 		std::copy_backward(lNode->keys + slot, lNode->keys + lNode->slots_used,
 				lNode->keys + lNode->slots_used + 1);
-		std::copy_backward(lNode->keys + slot, lNode->keys + lNode->slots_used + 1,
-			lNode->keys + lNode->slots_used + 2);
+		std::copy_backward(lNode->pointers + slot, lNode->pointers + lNode->slots_used,
+			lNode->pointers + lNode->slots_used + 1);
 
 		lNode->keys[slot] = key;
 		lNode->pointers[slot] = &dat;
@@ -144,16 +176,30 @@ typename Bplus<Tkey, Tdat>::Node * Bplus<Tkey, Tdat>::insert_recursive(Node *N, 
 		if (splitNode && lNode != *splitNode && slot == lNode->slots_used - 1) {
 			*splitKey = key;
 		}
-			return lNode;
+		
+		// for (int i = 0; i < lNode->slots_used; ++i)
+			// std::cout << lNode->keys[i] << " ";
+		// std::cout << std::endl;
+		// for (int i = 0; i < N->slots_used; ++i)
+			// std::cout << N->keys[i] << " ";
+		// std::cout << std::endl;
+		// if (this->root == lNode) std::cout << "Its N\n";
+		// else if (this->root == N) std::cout << "Its lNode\n";
+		// else std::cout << "Its neither\n";
+		
+		return lNode;
 	}
 }
 
 template <typename Tkey, typename Tdat>
 void Bplus<Tkey, Tdat>::traverse(Bplus<Tkey, Tdat>::Node *N) {
 	if (N->isleaf) {
-		for (int key = 0; key < N->slots_used; ++key)
-			std::cout << N->pointers << " ";
-		std::cout << std::endl;
+		std::cout << N->slots_used << "|";
+		for (int key = 0; key < N->slots_used; ++key) {
+			std::cout << N->keys[key] << ",";
+			// std::cout << N->pointers << " ";
+		}
+		std::cout << "|\n";
 	}
 	else
 		for (int key = 0; key < N->slots_used; ++key)
@@ -177,16 +223,30 @@ template <typename Tkey, typename Tdat>
 typename Bplus<Tkey, Tdat>::Node *Bplus<Tkey, Tdat>::insert(Tkey &key, Tdat &dat) {
 	Node *newChild = NULL;
 	Tkey newKey = Tkey();
+	
+	// std::cout << "Inserting " << key << "\n";
+	
 	if (this->root == NULL) {
-		this->root = this->headLeaf = this->tailLeaf = new Node(true);
+		this->root = new leafNode();
+		this->headLeaf = this->tailLeaf = this->root;
 	}
 	Node *return_val = insert_recursive(this->root, key, dat, &newKey, &newChild);
 	if (newChild) {
+		
+		// std::cout << "New Child after recursive insert\n";
+		
 		innerNode *newRoot = new innerNode();
-		newRoot->keys[0] = key;
-		newRoot->pointers[0] = newChild;
+		newRoot->keys[0] = newKey;
+		newRoot->pointers[0] = this->root;
+		newRoot->pointers[1] = newChild;
 		newRoot->slots_used = 1;
 		this->root = newRoot;
+		
+		// for (int i = 0; i < newRoot->slots_used; ++i)
+			// std::cout << newRoot->keys[i] << " ";
+		// std::cout << std::endl;
+		// std::cout << "|" << return_val << "|" << newChild << "|" << newRoot << "|\n";
+		
 	}
 	return return_val;
 }
