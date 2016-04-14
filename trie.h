@@ -5,6 +5,9 @@
 #include <list>
 #include <string>
 #include <iostream>
+#include <fstream>
+// #include <ifstream>
+// #include <ofstream>
 
 class Trie {
 	public:
@@ -13,12 +16,12 @@ class Trie {
 			std::list<Node *> children;
 			char letter;
 			bool isWord;
-			void *record_id;
-			int id;
-			inline Node(Node *p = NULL, char c = '\0') 
+			// void *record_id;
+			unsigned int id;
+			inline Node(Node *p = NULL, char c = '\0')
 				: parent(p), letter(c) {
 				isWord = 0;
-				record_id = NULL;
+				// record_id = NULL;
 			}
 		};
 
@@ -30,6 +33,15 @@ class Trie {
 		Node *find(std::string);
 		Node *insert(std::string, unsigned int);
 
+		template <typename T>
+		void writeData(std::ofstream &, T);
+
+		template <typename T>
+		void readData(std::ifstream &, T*);
+
+		void writeNode(std::ofstream&, Node *N);
+		void readNode(std::ifstream&);
+
 	public:
 		Trie();
 		~Trie();
@@ -39,6 +51,9 @@ class Trie {
 		bool contains(std::string);
 		void clear();
 		void show();
+
+		void serialize(std::string);
+		void deserialize(std::string);
 };
 
 

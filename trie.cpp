@@ -127,3 +127,68 @@ void Trie::clear() {
 void Trie::show() {
 	traverse(this->root, "");
 }
+
+void Trie::serialize(std::string ofile) {
+	std::ofstream ofs;
+	ofs.open(ofile, std::ios::binary);
+	writeNode(ofs, this->root);	
+}
+
+template <typename T>
+void Trie::writeData(std::ofstream& ofs, T data) {
+	ofs.write(reinterpret_cast<const char *>(&data), sizeof(data));
+}
+// template void Trie::writeData<char>;
+// template void Trie::writeData<bool>;
+// template void Trie::writeData<int>;
+// template void Trie::writeData<unsigned int>;
+
+template <typename T>
+void Trie::readData(std::ifstream& ifs, T *data) {
+	ifs.read(reinterpret_cast<char *>(data), sizeof(*data));
+}
+// template void Trie::readData<char>;
+// template void Trie::readData<bool>;
+// template void Trie::readData<int>;
+// template void Trie::readData<unsigned int>;
+
+void Trie::writeNode(std::ofstream& ofs, Node *N) {
+	// ofs << N->id << N->letter << N->isWord << N->children.size();
+	writeData(ofs, N->id);
+	writeData(ofs, N->letter);
+	writeData(ofs, N->isWord);
+	char nChildren = (char) N->children.size();
+	writeData(ofs, nChildren);
+	
+	std::cout << N->id << "|" << N->letter << "|" << N->isWord << "|" << N->children.size()<< "\n";
+	for (auto child : N->children)
+		writeNode(ofs, child);
+}
+
+void Trie::deserialize(std::string ifile) {
+	std::ifstream ifs;
+	ifs.open(ifile, std::ios::binary);
+	readNode(ifs);
+}
+
+void Trie::readNode(std::ifstream& ifs) {
+
+	// ifs.read(reinterpret_cast<char *>(&_id), sizeof(_id));
+	// ifs.read(reinterpret_cast<char *>(&_letter), sizeof(_letter));
+	// ifs.read(reinterpret_cast<char *>(&_isWord), sizeof(_isWord));
+	// ifs.read(reinterpret_cast<char *>(&_numChildren), sizeof(_numChildren));
+	do {
+		Node *N = new Node();
+		readData(ifs, &N->id);
+		readData(ifs, &N->letter);
+		readData(ifs, &N->isWord);
+		char _numChildren;
+		readData(ifs, &_numChildren);
+
+		std::cout << N->id << "|" << N->letter << "|" << N->isWord << "|" << (unsigned int) _numChildren << "\n";
+		delete N;
+	} while (ifs);
+}
+
+
+

@@ -25,4 +25,6 @@ class Dict : public Trie, public Bplus<unsigned int, Trie::Node> {
 		std::string extract(unsigned int);
 		void clear();
 		void show();
+		void serialize(std::string);
+		void deserialize(std::string);
 };

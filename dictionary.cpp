@@ -48,3 +48,10 @@ void Dict::show() {
 }
 
 
+void Dict::serialize(std::string file) {
+	this->trie.serialize(file);
+}
+
+void Dict::deserialize(std::string file) {
+	this->trie.deserialize(file);
+}
