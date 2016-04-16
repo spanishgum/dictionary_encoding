@@ -12,22 +12,24 @@ class Dict
 	typedef Bplus::Node BNode;
 	
 	private:
-	
-		Trie trie;
-		Bplus<unsigned int, Trie::Node> bplus;
+		
+		Trie *trie;
+		Bplus<unsigned int, Trie::Node> *bplus;
 		
 		unsigned int size;
 		void insert(std::string, unsigned int);
-	
+		
+		std::string ifile, ofile;
+		
 	public:
 	
-		Dict();
+		Dict(std::string = "", std::string = "");
 		~Dict();
 		
 		unsigned int insert(std::string);
 		void remove(std::string);
-		
 		void remove(unsigned int);
+		
 		int locate(std::string);
 		std::string extract(unsigned int);
 		

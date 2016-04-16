@@ -6,6 +6,9 @@ using namespace std;
 
 #define TESTMAX 10000
 
+int testPopulationOf(Dict *& D);
+int testSerializationOf(Dict *& D);
+
 int main() 
 {
 
@@ -19,30 +22,36 @@ int main()
 	return 0;
 }
 
-int testPopulationOf(Dict *& D) 
+int testPopulationOf(Dict *& D, std::string testFileName = "/usr/share/dict/cracklib-small")
 {
-	
 	ifstream ifs;
-	std::string testFileName = "/usr/share/dict/cracklib-small";
-	ifs.open(testFileName);
+
 	std::cout << "Testing population of Dictionary object using " 
 		<< testFileName << "\n";
+	ifs.open(testFileName);
+	if (!ifs) 
+	{
+		std::cerr << "Error: " << testFileName << " does not exist\n"
+		return -1;
+	}
 	
 	vector<unsigned int> V;
 	std::string line;
 	while (getline(ifs, line)) {
 		V.push_back(D->insert(line));
 	}
-	ifs.close();	
+	ifs.close();
+	
+	return 0;
 }
 
-int testSerializationOf(Dict *& D) 
+int testSerializationOf(Dict *& D)
 {
-	
 	std::cout << "Beginning test serialization\n";
 	D->serialize("serialize.test");
 	
 	std::cout << "Beginning test deserializtion\n";
 	D->deserialize("serialize.test");
 	
+	return 0;
 }

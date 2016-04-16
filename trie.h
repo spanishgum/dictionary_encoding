@@ -6,12 +6,11 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-// #include <ifstream>
-// #include <ofstream>
 
 class Trie 
 {
 	public:
+	
 		struct Node 
 		{
 			Node *parent;
@@ -44,9 +43,7 @@ class Trie
 
 	public:
 	
-		Trie();
-		Trie(std::string);
-		Trie(std::string, std::string);
+		Trie(std::string = "", std::string = "");
 		~Trie();
 		
 		// void insert(std::string);

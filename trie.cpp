@@ -1,28 +1,15 @@
 #include "trie.h"
 
-Trie::Trie() 
+Trie::Trie(std::string ifile, std::string ofile)
 {
-	this->root = new Trie::Node();
-	this->save_file = "";
-}
-
-Trie::Trie(std::string ifile) 
-{
-	if (ifile != NULL)
-		this->deserialize(ifile);
-	this->save_file = "";
-}
-
-Trie::Trie(std::string ifile, std::string ofile) 
-{
-	if (ifile != NULL)
-		this->deserialize(ifile);
 	this->save_file = ofile;
+	if (ifile.length())
+		this->deserialize(ifile);
 }
 
 Trie::~Trie() 
 {
-	if (this->save_file != NULL)
+	if (this->save_file.length())
 		this->serialize(this->save_file);
 	this->clear();
 }
@@ -129,7 +116,7 @@ Trie::Node *Trie::insert(std::string s, unsigned int id)
 }
 
 // void Trie::insert(std::string s) 
-{
+// {
 	// this->insert(s, 0);
 // }
 
