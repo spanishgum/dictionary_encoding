@@ -9,23 +9,23 @@
 // #include <ifstream>
 // #include <ofstream>
 
-class Trie {
+class Trie 
+{
 	public:
-		struct Node {
+		struct Node 
+		{
 			Node *parent;
 			std::list<Node *> children;
 			char letter;
 			bool isWord;
-			// void *record_id;
 			unsigned int id;
+			
 			inline Node(Node *p = NULL, char c = '\0')
-				: parent(p), letter(c) {
-				isWord = 0;
-				// record_id = NULL;
-			}
+				: parent(p), letter(c), isWord(0) { }
 		};
 
 		Node *root;
+		std::string save_file;
 		
 		void clear_recursive(Node *);
 		void traverse(Node *, std::string);
@@ -43,12 +43,18 @@ class Trie {
 		void readNode(std::ifstream&);
 
 	public:
+	
 		Trie();
+		Trie(std::string);
+		Trie(std::string, std::string);
 		~Trie();
+		
 		// void insert(std::string);
-		std::string getString(Node *);
 		void remove(std::string);
+
+		std::string getString(Node *);
 		bool contains(std::string);
+		
 		void clear();
 		void show();
 

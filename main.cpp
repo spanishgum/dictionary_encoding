@@ -6,52 +6,43 @@ using namespace std;
 
 #define TESTMAX 10000
 
-int main() {
-	// Trie *T = new Trie();
-	// Bplus<int, int> *B = new Bplus<int, int>();
-	// int testKeys[10];
-	// int testDats[10];
-	// for (int i = 0; i < 10; ++i)
-		// testKeys[i] = testDats[i] = i*3 % 20;
-	// for (int i = 0; i < 10; ++i)
-		// B->insert(testKeys[i], testDats[i]);
-	
-	Dict *D = new Dict();
-	
-	vector<unsigned int> V;
-	string line, testFileName = "/usr/share/dict/cracklib-small";
-	ifstream ifs;
-	ifs.open(testFileName);
-	int i = 0;
-	while (getline(ifs, line)) {
-		// std::cout << line << '\n';
-		V.push_back(D->insert(line));
-		// D->show();
-		// cin.get();
-		// if (++i > TESTMAX) break;
-	}
-	ifs.close();
-	std::cout << "Beginning test serialization\n";
-	// ifs.open(testFileName);
-	// int idx = 0, test_idx;
-	// bool test_result = 1;
-	// while (getline(ifs, line)) {
-		// test_idx = D->locate(line);
-		// test_result &= (test_idx == idx);
-		// ++idx;
-	// }
-	// cout << "Test result: " << test_result << "\n";
+int main() 
+{
 
-	D->serialize("serialize.test");
-	std::cout << "Beginning test deserializtion\n";
-	D->deserialize("serialize.test");
-
+	std::string ifile = "/usr/share/dict/cracklib-small";
+	std::string ofile = "testOut.dict";
+	Dict *D = new Dict(ifile, ofile);
 	
-	// unsigned int hello = D->insert("hello");
-	// unsigned int world = D->insert("world");
-	// cout << hello << " " << world << endl;
-	// cout << D->extract(hello) << endl;
-	// cout << D->extract(world) << endl;
+	testPopulationOf(D);
+	testSerializationOf(D);
 	
 	return 0;
+}
+
+int testPopulationOf(Dict *& D) 
+{
+	
+	ifstream ifs;
+	std::string testFileName = "/usr/share/dict/cracklib-small";
+	ifs.open(testFileName);
+	std::cout << "Testing population of Dictionary object using " 
+		<< testFileName << "\n";
+	
+	vector<unsigned int> V;
+	std::string line;
+	while (getline(ifs, line)) {
+		V.push_back(D->insert(line));
+	}
+	ifs.close();	
+}
+
+int testSerializationOf(Dict *& D) 
+{
+	
+	std::cout << "Beginning test serialization\n";
+	D->serialize("serialize.test");
+	
+	std::cout << "Beginning test deserializtion\n";
+	D->deserialize("serialize.test");
+	
 }
