@@ -518,31 +518,111 @@ typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::remove_recursive(Tk
 }
 
 template <typename Tkey, typename Tdat>
-typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::shift_lNodeL(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tdat>::Node *M, Bplus<Tkey, Tdat>::Node *MP, unsigned int p_slot)
+typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::shift_lNodeL(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tdat>::Node *M, Bplus<Tkey, Tdat>::Node *P, unsigned int p_slot)
 {
-	////////////////////////////////////////// WHATATATATATA
-	return remove_result(ok);
+	unsigned int shiftnum = (M->slots_used - N->slots_used) >> 1;
+
+	std::copy(M->keys, M->keys + shiftnum,
+		N->keys + N->slots_used);
+	std::copy(M->pointers, M->pointers + shiftnum,
+		N->pointers + N->slots_used);
+
+	N->slots_used += shiftnum;
+
+	std::copy(M->keys + shiftnum, M->keys + M->slots_used,
+		M->keys);
+	std::copy(M->pointers + shiftnum, M->pointers + M->slots_used,
+		M->pointers);
+
+	M->slots_used -= shiftnum;
+
+	if (p_slot < P->slots_used) 
+	{
+		P->keys[p_slot] = N->keys[N->slots_used - 1];
+		return remove_result(ok);
+	}
+	else
+	{
+		return remove_result(update_last_key, N->keys[N->slots_used - 1]);
+	}
 }
 
 template <typename Tkey, typename Tdat>
-typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::shift_lNodeR(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tdat>::Node *M, Bplus<Tkey, Tdat>::Node *MP, unsigned int p_slot)
+void Bplus<Tkey, Tdat>::shift_lNodeR(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tdat>::Node *M, Bplus<Tkey, Tdat>::Node *P, unsigned int p_slot)
 {
-	////////////////////////////////////////// WHATATATATATA
-	return remove_result(ok);
+	unsigned int shiftnum = (N->slots_used - M->slots_used) >> 1;
+
+	std::copy(M->keys, M->keys + shiftnum,
+		N->keys + N->slots_used);
+	std::copy(M->pointers, M->pointers + shiftnum,
+		N->pointers + N->slots_used);
+
+	N->slots_used += shiftnum;
+
+	std::copy_backward(M->keys, M->keys + M->slots_used,
+		M->keys + M->slots_used + shiftnum);
+	std::copy_backward(M->pointers, M->pointers + M->slots_used,
+		M->pointers + M->slots_used + shiftnum);
+
+	M->slots_used += shiftnum;
+
+	std::copy(N->keys + N->slots_used - shiftnum, N->keys + N->slots_used,
+		M->keys);
+	std::copy(N->pointers + N->slots_used - shiftnum, N->pointers + N->slots_used,
+		M->pointers);
+		
+	N->slots_used -= shiftnum;
+	
+	P->keys[p_slot] = N->keys[N->slots_used - 1];
 }
 
 template <typename Tkey, typename Tdat>
-typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::shift_iNodeL(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tdat>::Node *M, Bplus<Tkey, Tdat>::Node *MP, unsigned int p_slot)
+void Bplus<Tkey, Tdat>::shift_iNodeL(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tdat>::Node *M, Bplus<Tkey, Tdat>::Node *P, unsigned int p_slot)
 {
-	////////////////////////////////////////// WHATATATATATA
-	return remove_result(ok);
+	unsigned int shiftnum = (M->slots_used - N->slots_used) >> 1;
+	
+	N->keys[N->slots_used] = P->keys[p_slot];
+	N->slots_used++;
+	
+	std::copy(M->keys, M->keys + shiftnum - 1,
+		N->keys + N->slots_used);
+	std::copy(M->pointers, M->pointers + shiftnum,
+		N->pointers + N->slots_used);
+		
+	N->slots_used += shiftnum - 1;
+	
+	P->keys[p_slot] = M->keys[shiftnum - 1];
+	
+	std::copy(M->keys + shiftnum, M->keys + M->slots_used,
+		M->keys);
+	std::copy(M->pointers + shiftnum, M->pointers + M->slots_used + 1,
+		M->pointers);
+		
+	M->slots_used -= shiftnum;
 }
 
 template <typename Tkey, typename Tdat>
-typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::shift_iNodeR(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tdat>::Node *M, Bplus<Tkey, Tdat>::Node *MP, unsigned int p_slot)
+void Bplus<Tkey, Tdat>::shift_iNodeR(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tdat>::Node *M, Bplus<Tkey, Tdat>::Node *P, unsigned int p_slot)
 {
-	////////////////////////////////////////// WHATATATATATA
-	return remove_result(ok);
+	unsigned int shiftnum = (M->slots_used - N->slots_used) >> 1;
+	
+	std::copy_backward(M->keys, M->keys + M->slots_used,
+		M->keys + M->slots_used + shiftnum);
+	std::copy_backward(M->pointers, M->pointers + M->slots_used + 1,
+		M->pointers + M->slots_used + 1 + shiftnum);
+	
+	M->slots_used += shiftnum;
+	
+	M->keys[shiftnum - 1] = P->keys[p_slot];
+	
+	std::copy(N->keys + N->slots_used - shiftnum + 1, N->keys + N->slots_used,
+		M->keys);
+	std::copy(N->pointers + N->slots_used - shiftnum + 1, N->pointers + N->slots_used,
+		M->pointers);
+	
+	P->keys[p_slot] = N->keys[N->slots_used - shiftnum];
+	
+	N->slots_used -= shiftnum;
 }
 
 template <typename Tkey, typename Tdat>

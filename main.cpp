@@ -11,7 +11,7 @@ using namespace std;
 void timeit(void(Dict::*)(void), Dict&);
 void timeit(void(*)(void));
 
-int testPopulationOf(Dict *& D, std::string = "/usr/share/dict/cracklib-small"); 
+int testPopulationOf(Dict *& D, std::string = "/usr/share/dict/cracklib-small");
 int testSerializationOf(Dict *& D);
 
 int main(int argc, char **argv)

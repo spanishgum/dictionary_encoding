@@ -133,10 +133,10 @@ class Bplus
 		remove_result remove_recursive(Tkey, Node *, Node *, Node *, Node *, Node *, Node *, unsigned int);
 		
 		remove_result shift_lNodeL(Node *, Node *, Node *, unsigned int);
-		remove_result shift_lNodeR(Node *, Node *, Node *, unsigned int);
+		void shift_lNodeR(Node *, Node *, Node *, unsigned int);
 		
-		remove_result shift_iNodeL(Node *, Node *, Node *, unsigned int);
-		remove_result shift_iNodeR(Node *, Node *, Node *, unsigned int);
+		void shift_iNodeL(Node *, Node *, Node *, unsigned int);
+		void shift_iNodeR(Node *, Node *, Node *, unsigned int);
 		
 		void clear_recursive(Node *);
 		void traverse(Node *);
