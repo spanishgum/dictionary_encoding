@@ -16,7 +16,7 @@ class Bplus
 			// max_slots = 4,
 			min_slots = (max_slots / 2);
 
-		struct Node 
+		struct Node
 		{
 			Tkey *keys;
 			void **pointers;
@@ -71,7 +71,6 @@ class Bplus
 		Node *root;
 		Node *headLeaf, *tailLeaf;
 
-		Node *createNode();
 		inline int lower_key_idx(const Node *N, const Tkey& key) const 
 		{
 			int lo = 0;
@@ -88,14 +87,58 @@ class Bplus
 			return lo;
 		}
 
-		void merge(Node *, Node *);
+		enum remove_flags
+		{
+			ok = 0,
+			key_not_found = 1,
+			update_last_key = 2,
+			fix_merge = 4
+		};
 		
-		void split(innerNode *, Tkey *, Node **, unsigned int);
-		void split(leafNode *, Tkey *, Node **);
+		struct remove_result
+		{
+			remove_flags flags;
+			Tkey last_key;
+			
+			inline explicit remove_result(remove_flags f = ok)
+				: flags(f), last_key() { }
+			
+			inline remove_result(remove_flags f, const Tkey &k)
+				: flags(f), last_key(k) { }
+				
+			inline bool has(remove_flags f) const
+			{
+				return (flags & f) != 0;
+			}
+			
+			inline remove_result& operator |= (const remove_result& other)
+			{
+				flags = remove_flags(flags | other.flags);
+				
+				if (other.has(update_last_key))
+					last_key = other.last_key;
+					
+				return *this;
+			}
+		};
 		
-		void clear_recursive(Node *);
+		void split_iNodes(innerNode *, Tkey *, Node **, unsigned int);
+		void split_lNodes(leafNode *, Tkey *, Node **);
+		
 		Node *insert_recursive(Node *, const Tkey&, Tdat&, Tkey *, Node **);
 		
+		remove_result merge_iNodes(innerNode *, Node *, Node *, unsigned int); 
+		remove_result merge_lNodes(leafNode *, leafNode *, Node *); 
+		
+		remove_result remove_recursive(Tkey, Node *, Node *, Node *, Node *, Node *, Node *, unsigned int);
+		
+		remove_result shift_lNodeL(Node *, Node *, Node *, unsigned int);
+		remove_result shift_lNodeR(Node *, Node *, Node *, unsigned int);
+		
+		remove_result shift_iNodeL(Node *, Node *, Node *, unsigned int);
+		remove_result shift_iNodeR(Node *, Node *, Node *, unsigned int);
+		
+		void clear_recursive(Node *);
 		void traverse(Node *);
 
 	public:
@@ -104,7 +147,7 @@ class Bplus
 		~Bplus();
 		
 		Node *insert(Tkey &, Tdat &);
-		int remove(Tkey);
+		remove_result remove(Tkey);
 
 		Tdat *find(Tkey);
 

@@ -16,22 +16,46 @@ Bplus<Tkey, Tdat>::~Bplus()
 	this->clear();
 }
 
-
 template <typename Tkey, typename Tdat>
-typename Bplus<Tkey, Tdat>::Node *Bplus<Tkey, Tdat>::createNode() 
+typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::merge_iNodes(Bplus<Tkey, Tdat>::innerNode *N, Bplus<Tkey, Tdat>::Node *M, Bplus<Tkey, Tdat>::Node *P, unsigned int p_slot) 
 {
-
-	return NULL;
+	N->keys[N->slots_used] = P->keys[p_slot];
+	M->slots_used++;
+	
+	std::copy(M->keys, M->keys + M->slots_used,
+		N->keys + N->slots_used);
+	std::copy(M->pointers, M->pointers + M->slots_used + 1,
+		N->pointers + N->slots_used);
+		
+	N->slots_used += M->slots_used;
+	M->slots_used = 0;
+	
+	return remove_result(ok);
 }
 
 template <typename Tkey, typename Tdat>
-void Bplus<Tkey, Tdat>::merge(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tdat>::Node *M) 
+typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::merge_lNodes(Bplus<Tkey, Tdat>::leafNode *N, Bplus<Tkey, Tdat>::leafNode *M, Bplus<Tkey, Tdat>::Node *P)
 {
-
+	std::copy(M->keys, M->keys + M->slots_used,
+		N->keys + N->slots_used);
+	std::copy(M->pointers, M->pointers + M->slots_used,
+		N->pointers + N->slots_used);
+	
+	N->slots_used += M->slots_used;
+	
+	N->next = M->next;
+	if (N->next)
+		N->next->prev = N;
+	else
+		this->tailLeaf = N;
+	
+	M->slots_used = 0;
+	
+	return remove_result(ok);
 }
 
 template <typename Tkey, typename Tdat>
-void Bplus<Tkey, Tdat>::split(Bplus<Tkey, Tdat>::innerNode *iNode, Tkey *_newKey, Node **_newInner, unsigned int addSlot) 
+void Bplus<Tkey, Tdat>::split_iNodes(Bplus<Tkey, Tdat>::innerNode *iNode, Tkey *_newKey, Node **_newInner, unsigned int addSlot) 
 {
 	unsigned int mid = (iNode->slots_used >> 1);
 	innerNode *newInner = new innerNode();
@@ -53,7 +77,7 @@ void Bplus<Tkey, Tdat>::split(Bplus<Tkey, Tdat>::innerNode *iNode, Tkey *_newKey
 }
 
 template <typename Tkey, typename Tdat>
-void Bplus<Tkey, Tdat>::split(Bplus<Tkey, Tdat>::leafNode *lNode, Tkey *_newKey, Node **_newLeaf) 
+void Bplus<Tkey, Tdat>::split_lNodes(Bplus<Tkey, Tdat>::leafNode *lNode, Tkey *_newKey, Node **_newLeaf) 
 {
 	unsigned int mid = (lNode->slots_used >> 1);
 	leafNode *newLeaf = new leafNode();
@@ -124,13 +148,13 @@ typename Bplus<Tkey, Tdat>::Node * Bplus<Tkey, Tdat>::insert_recursive(Node *N, 
 		Node *newChild = NULL;
 		
 		int slot = lower_key_idx(N, key);
-		Node *recurse_result = insert_recursive(static_cast<Node *>(iNode->pointers[slot]), key, dat, &newKey, &newChild);
+		Node *rr = insert_recursive(static_cast<Node *>(iNode->pointers[slot]), key, dat, &newKey, &newChild);
 		
 		if (newChild) 
 		{	
 			if (iNode->isfull()) 
 			{	
-				split(iNode, splitKey, splitNode, slot);
+				split_iNodes(iNode, splitKey, splitNode, slot);
 				if (slot == iNode->slots_used + 1 && iNode->slots_used < (*splitNode)->slots_used)
 				{
 					innerNode *splitInner = static_cast<innerNode *>(*splitNode);
@@ -139,7 +163,7 @@ typename Bplus<Tkey, Tdat>::Node * Bplus<Tkey, Tdat>::insert_recursive(Node *N, 
 					iNode->slots_used++;
 					splitInner->pointers[0] = newChild;
 					*splitKey = newKey;
-					return recurse_result;
+					return rr;
 				}
 				else if (slot >= iNode->slots_used + 1) 
 				{
@@ -158,7 +182,7 @@ typename Bplus<Tkey, Tdat>::Node * Bplus<Tkey, Tdat>::insert_recursive(Node *N, 
 			iNode->slots_used++;
 		}
 		
-		return recurse_result;
+		return rr;
 	}
 	else 
 	{
@@ -173,7 +197,7 @@ typename Bplus<Tkey, Tdat>::Node * Bplus<Tkey, Tdat>::insert_recursive(Node *N, 
 
 			// std::cout << "splitting leaf node . . .\n";
 
-			split(lNode, splitKey, splitNode);
+			split_lNodes(lNode, splitKey, splitNode);
 			
 			
 			if (slot >= lNode->slots_used) 
@@ -263,10 +287,262 @@ typename Bplus<Tkey, Tdat>::Node *Bplus<Tkey, Tdat>::insert(Tkey &key, Tdat &dat
 }
 
 template <typename Tkey, typename Tdat>
-int Bplus<Tkey, Tdat>::remove(Tkey) 
+typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::remove(Tkey key)
 {
+	if (!this->root) 
+		return remove_result(ok); ////////////////////////////////////////////////////////
+	remove_result rr = remove_recursive(key, this->root, NULL, NULL, NULL, NULL, NULL, 0);
+	return rr;
+}
 
-	return 0;
+template <typename Tkey, typename Tdat>
+typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::remove_recursive(Tkey key, Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tdat>::Node *L, Bplus<Tkey, Tdat>::Node *R, Bplus<Tkey, Tdat>::Node *LP, Bplus<Tkey, Tdat>::Node *RP, Bplus<Tkey, Tdat>::Node *P, unsigned int p_slot)
+{
+	if (N->isleaf)
+	{
+		leafNode *lNodeN = static_cast<leafNode *>(N);
+		leafNode *lNodeL = static_cast<leafNode *>(L);
+		leafNode *lNodeR = static_cast<leafNode *>(R);
+		
+		int slot = lower_key_idx(lNodeN, key);
+		
+		if (slot >= lNodeN->slots_used || (key != lNodeN->keys[slot]))
+		{
+			return remove_result(key_not_found);
+		}
+		
+		std::copy(lNodeN->keys + slot + 1, lNodeN->keys + lNodeN->slots_used,
+			lNodeN->keys + slot);
+		std::copy(lNodeN->pointers + slot + 1, lNodeN->pointers + lNodeN->slots_used,
+			lNodeN->pointers + slot);
+		
+		lNodeN->slots_used--;
+		
+		remove_result rr = remove_result(ok);
+		
+		if (slot == lNodeN->slots_used)
+		{
+			if (P && p_slot < P->slots_used)
+			{
+				P->keys[p_slot] = lNodeN->keys[lNodeN->slots_used - 1];
+			}
+			else
+			{
+				if (lNodeN->slots_used >= 1)
+				{
+					rr |= remove_result(update_last_key, lNodeN->keys[lNodeN->slots_used - 1]);
+				}
+			}
+		}
+		
+		if (lNodeN->isunderflow() && !(lNodeN == this->root && lNodeN->slots_used >= 1))
+		{
+			if (lNodeL == NULL && lNodeR == NULL) 
+			{
+				delete this->root;
+				this->root = lNodeN = NULL;
+				this->tailLeaf = this->headLeaf = NULL;
+				
+				return remove_result(ok);
+			}
+			else if ((lNodeL == NULL || lNodeL->isfew()) && (lNodeR == NULL || lNodeR->isfew()))
+			{
+				if (LP == P)
+					rr |= merge_lNodes(lNodeL, lNodeN, LP);
+				else
+					rr |= merge_lNodes(lNodeN, lNodeR, RP);
+			}
+			else if ((lNodeL != NULL && lNodeL->isfew()) && (lNodeR != NULL && lNodeR->isfew()))
+			{
+				if (RP == P)
+					rr |= shift_lNodeL(lNodeN, lNodeR, RP, p_slot);
+				else
+					rr |= merge_lNodes(lNodeL, lNodeN, LP);
+			}			
+			else if ((lNodeN != NULL && !lNodeN->isfew()) && (lNodeR != NULL && lNodeR->isfew()))
+			{
+				if (LP == P)
+					shift_lNodeR(lNodeL, lNodeN, LP, p_slot - 1);
+				else
+					rr |= merge_lNodes(lNodeN, lNodeR, RP);
+			}
+			else if (LP == RP)
+			{
+				if (lNodeL->slots_used <= lNodeR->slots_used)
+					rr |= shift_lNodeL(lNodeN, lNodeR, RP, p_slot);
+				else
+					shift_lNodeR(lNodeL, lNodeN, LP, p_slot - 1);
+			}
+			else
+			{
+				if (LP == P)
+					shift_lNodeR(lNodeL, lNodeN, LP, p_slot - 1);
+				else
+					rr |= shift_lNodeL(lNodeN, lNodeR, RP, p_slot);
+			}
+		}
+		
+		return remove_result(rr);
+	}
+	else
+	{
+		innerNode *iNodeN = static_cast<innerNode *>(N);
+		innerNode *iNodeL = static_cast<innerNode *>(L);
+		innerNode *iNodeR = static_cast<innerNode *>(R);
+		
+		Node *_L, *_R;
+		innerNode *_LP, *_RP;
+		
+		int slot = lower_key_idx(iNodeN, key);
+		
+		if (slot == 0)
+		{
+			_L = (L == NULL) ? NULL 
+				: static_cast< Bplus<Tkey, Tdat>::Node * >((static_cast<innerNode *>(L))->pointers[L->slots_used - 1]);
+			_LP = static_cast<Bplus<Tkey, Tdat>::innerNode *>(LP);
+		}
+		else
+		{
+			_L = static_cast<Bplus<Tkey, Tdat>::Node *>(iNodeN->pointers[slot - 1]);
+			_LP = iNodeN;
+		}
+		
+		if (slot == iNodeN->slots_used)
+		{
+			_R = (R == NULL) ? NULL 
+				: static_cast< Bplus<Tkey, Tdat>::Node * >((static_cast<innerNode *>(R))->pointers[0]);
+			_RP = static_cast<Bplus<Tkey, Tdat>::innerNode *>(RP);;
+		}
+		else
+		{
+			_R = static_cast< Bplus<Tkey, Tdat>::Node * >(iNodeN->pointers[slot + 1]);
+			_RP = iNodeN;
+		}
+		
+		remove_result result = remove_recursive(key, static_cast<Bplus<Tkey, Tdat>::Node *>(iNodeN->pointers[slot]), _L, _R, _LP, _RP, iNodeN, slot);
+		
+		remove_result rr = remove_result(ok);
+		
+		if (result.has(key_not_found))
+		{
+			return remove_result(result);
+		}
+		
+		if (result.has(update_last_key))
+		{
+			if (P && p_slot < P->slots_used)
+			{
+				P->keys[p_slot] = result.last_key;
+			}
+			else
+			{
+				rr |= remove_result(update_last_key, result.last_key);
+			}
+		}
+		
+		if (result.has(fix_merge))
+		{
+			if (static_cast< Bplus<Tkey, Tdat>::Node * >(iNodeN->pointers[slot])->slots_used != 0)
+				slot++;
+
+			delete static_cast< Bplus<Tkey, Tdat>::Node * >(iNodeN->pointers[slot]);
+
+			std::copy(iNodeN->keys + slot, iNodeN->keys + iNodeN->slots_used,
+					  iNodeN->keys + slot - 1);
+			std::copy(iNodeN->pointers + slot + 1, iNodeN->pointers + iNodeN->slots_used + 1,
+					  iNodeN->pointers + slot);
+
+			iNodeN->slots_used--;
+
+			// trying to fake (iNodeN->level == 1) // i.e. children are leaves
+			if (iNodeN->slots_used && 
+				static_cast< Bplus<Tkey, Tdat>::Node * >(iNodeN->pointers[0])->isleaf)
+			{
+				slot--;
+				leafNode* child = static_cast<leafNode *>(iNodeN->pointers[slot]);
+				iNodeN->keys[slot] = child->keys[child->slots_used - 1];
+			}
+			
+		}
+		
+		if (iNodeN->isunderflow() && !(iNodeN == this->root && iNodeN->slots_used >= 1))
+		{
+			if (iNodeL == NULL && iNodeR == NULL)
+			{
+				this->root = static_cast< Bplus<Tkey, Tdat>::Node * >(iNodeN->pointers[0]);
+
+				iNodeN->slots_used = 0;
+				delete iNodeN;
+
+				return remove_result(ok);
+			}
+			else if ((iNodeL == NULL || iNodeL->isfew()) && (iNodeR == NULL || iNodeR->isfew()))
+			{
+				if (LP == P)
+					rr |= merge_iNodes(iNodeL, iNodeN, LP, p_slot - 1);
+				else
+					rr |= merge_iNodes(iNodeN, iNodeR, RP, p_slot);
+			}
+			else if ((iNodeL != NULL && iNodeL->isfew()) && (iNodeR != NULL && !iNodeR->isfew()))
+			{
+				if (RP == P)
+					shift_iNodeL(iNodeN, iNodeR, RP, p_slot);
+				else
+					rr |= merge_iNodes(iNodeL, iNodeN, LP, p_slot - 1);
+			}
+			else if ((iNodeL != NULL && !iNodeL->isfew()) && (iNodeR != NULL && iNodeR->isfew()))
+			{
+				if (LP == P)
+					shift_iNodeR(iNodeL, iNodeN, LP, p_slot - 1);
+				else
+					rr |= merge_iNodes(iNodeN, iNodeR, RP, p_slot);
+			}
+			else if (LP == RP)
+			{
+				if (iNodeL->slots_used <= iNodeR->slots_used)
+					shift_iNodeL(iNodeN, iNodeR, RP, p_slot);
+				else
+					shift_iNodeR(iNodeL, iNodeN, LP, p_slot - 1);
+			}
+			else
+			{
+				if (LP == P)
+					shift_iNodeR(iNodeL, iNodeN, LP, p_slot - 1);
+				else
+					shift_iNodeL(iNodeN, iNodeR, RP, p_slot);
+			}
+		}
+		
+		return remove_result(rr);
+	}
+}
+
+template <typename Tkey, typename Tdat>
+typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::shift_lNodeL(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tdat>::Node *M, Bplus<Tkey, Tdat>::Node *MP, unsigned int p_slot)
+{
+	////////////////////////////////////////// WHATATATATATA
+	return remove_result(ok);
+}
+
+template <typename Tkey, typename Tdat>
+typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::shift_lNodeR(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tdat>::Node *M, Bplus<Tkey, Tdat>::Node *MP, unsigned int p_slot)
+{
+	////////////////////////////////////////// WHATATATATATA
+	return remove_result(ok);
+}
+
+template <typename Tkey, typename Tdat>
+typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::shift_iNodeL(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tdat>::Node *M, Bplus<Tkey, Tdat>::Node *MP, unsigned int p_slot)
+{
+	////////////////////////////////////////// WHATATATATATA
+	return remove_result(ok);
+}
+
+template <typename Tkey, typename Tdat>
+typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::shift_iNodeR(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tdat>::Node *M, Bplus<Tkey, Tdat>::Node *MP, unsigned int p_slot)
+{
+	////////////////////////////////////////// WHATATATATATA
+	return remove_result(ok);
 }
 
 template <typename Tkey, typename Tdat>
