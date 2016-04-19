@@ -19,8 +19,8 @@ int main(int argc, char **argv)
 	// std::string ifile = "/usr/share/dict/cracklib-small";
 	// std::string ofile = "testOut.dict";
 	
-	std::string ifile = "nTriples.nt";
-	std::string ofile = "nTriples.btd";
+	std::string ifile = "../nTriples.nt";
+	std::string ofile = "../nTriples.btd";
 	
 	std::cout << "Building rdf2btd converter\n";
 	rdf2btd Converter(ifile, ofile);

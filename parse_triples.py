@@ -4,6 +4,8 @@ from rdflib import URIRef, Graph, Namespace
 from rdflib.plugins.parsers.notation3 import N3Parser
 
 def file_err(arg):
+	if not arg:
+		return True
 	if not os.path.isfile(arg):
 		sys.stderr.write('Invalid path: {}\nUsing stdin instead\n'.format(arg))
 		return True
@@ -21,8 +23,16 @@ def get_parser():
 def main():
 	parser = get_parser()
 	args = parser.parse_args()
-	ifile = open(args.ifile, 'r') if not file_err(args.ifile) else sys.stdin
-	ofile = open(args.ofile, 'w') if args.ofile else sys.stdout
+	if not file_err(args.ifile):
+		ifile = open(args.ifile, 'r')
+	else:
+		ifile = sys.stdin
+	# ifile = open(args.ifile, 'r') if not file_err(args.ifile) else sys.stdin
+	if not args.ofile:
+		ofile = sys.stdout
+	else:
+		ofile = open(args.ofile, 'w')
+	# ofile = open(args.ofile, 'w') if args.ofile else sys.stdout
 	
 	g = Graph()
 	result = g.parse(file=ifile, format='n3')
