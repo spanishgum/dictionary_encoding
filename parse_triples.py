@@ -11,7 +11,7 @@ def file_err(arg):
 		return True
 	return False
 	
-def enc():
+def enc(s):
 	return s.encode('utf-8')
 
 def get_parser():
