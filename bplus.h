@@ -2,6 +2,7 @@
 #define BPLUS_H
 
 #include <cstdlib>
+#include <iomanip>
 
 #define CACHE_LINE_SIZE 256
 #define Bmax(a, b) ((a) > (b) ? (a) : (b))
@@ -139,6 +140,7 @@ class Bplus
 		void shift_iNodeR(Node *, Node *, Node *, unsigned int);
 		
 		void clear_recursive(Node *);
+		void printNode(Node *);
 		void traverse(Node *);
 
 	public:

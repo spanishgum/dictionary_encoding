@@ -226,20 +226,42 @@ typename Bplus<Tkey, Tdat>::Node * Bplus<Tkey, Tdat>::insert_recursive(Node *N, 
 }
 
 template <typename Tkey, typename Tdat>
-void Bplus<Tkey, Tdat>::traverse(Bplus<Tkey, Tdat>::Node *N) 
+void Bplus<Tkey, Tdat>::traverse(Bplus<Tkey, Tdat>::Node *N)
 {
-	if (N->isleaf) 
+	this->printNode(N);
+	for (int key = 0; key < N->slots_used; ++key)
+		traverse(static_cast<Bplus<Tkey, Tdat>::Node *>(N->pointers[key]));
+}
+
+template <typename Tkey, typename Tdat>
+void Bplus<Tkey, Tdat>::printNode(Bplus<Tkey, Tdat>::Node *N)
+{
+	if (!N) return;
+	std::cout << "----------------------------------------------\n|";
+	for (int key = 0; key < this->max_slots; ++key) 
 	{
-		std::cout << N->slots_used << "|";
-		for (int key = 0; key < N->slots_used; ++key) 
+		if (key < N->slots_used)
 		{
-			std::cout << N->keys[key] << ",";
+			std::cout << std::fixed << std::setprecision(8) << N->keys[key] << "|";
 		}
-		std::cout << "|\n";
+		else
+		{
+			std::cout << std::fixed << std::setprecision(8) << -1 << "|";
+		}
 	}
-	else
-		for (int key = 0; key < N->slots_used; ++key)
-			traverse(static_cast<Bplus<Tkey, Tdat>::Node *>(N->pointers[key]));
+	std::cout << "\n----------------------------------------------\n";
+	for (int ptr = 0; ptr < this->max_slots; ++ptr) 
+	{
+		if (ptr < N->slots_used)
+		{
+			std::cout << "    x   |";
+		}
+		else
+		{
+			std::cout << "        |";
+		}
+	}
+	std::cout << "\n----------------------------------------------\n";
 }
 
 template <typename Tkey, typename Tdat>
