@@ -1,7 +1,7 @@
 #include "rdf2btd.h"
 
 #define TEMP_EXT ".parsed"
-#define PYTHON "python"
+#define PYTHON "/usr/bin/python"
 #define PY_N3_PARSER "parse_triples.py"
 
 rdf2btd::rdf2btd(std::string i, std::string o)
