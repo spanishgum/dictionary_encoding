@@ -12,7 +12,8 @@ Dict::Dict(std::string i, std::string o)
 
 Dict::~Dict() 
 {
-
+	delete this->trie;
+	delete this->bplus;
 }
 
 void Dict::insert(std::string s, unsigned int id) 
@@ -32,7 +33,7 @@ void Dict::remove(std::string)
 
 }
 
-void Dict::remove(unsigned int) 
+void Dict::remove(unsigned int)
 {
 
 }
@@ -53,7 +54,12 @@ std::string Dict::extract(unsigned int id)
 
 void Dict::clear() 
 {
-
+	std::cout << "Clearing bplus\n";
+	this->bplus->clear();
+	std::cout << "Clearing trie\n";
+	this->trie->clear();
+	std::cout << "Dict is cleared\n";
+	
 }
 
 void Dict::show() 

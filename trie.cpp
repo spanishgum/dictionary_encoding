@@ -16,6 +16,7 @@ Trie::~Trie()
 
 void Trie::traverse(Trie::Node *N, std::string s) 
 {
+	if (!N) return;
 	std::list<Trie::Node *>::iterator I = N->children.begin();
 	
 	std::cout << N->letter << std::endl;
@@ -33,6 +34,7 @@ void Trie::traverse(Trie::Node *N, std::string s)
 
 void Trie::clear_recursive(Trie::Node *N) 
 {
+	if (!N) return;
 	typedef typename std::list<Trie::Node *>::iterator itr;
 	for (itr I = N->children.begin(); I != N->children.end(); ++I)
 		clear_recursive(*I);
@@ -205,6 +207,7 @@ void Trie::readData(std::ifstream& ifs, T *data)
 
 void Trie::writeNode(std::ofstream& ofs, Node *N) 
 {
+	if (!N) return;
 	char nChildren = (char) N->children.size();
 	
 	writeData(ofs, N->id);

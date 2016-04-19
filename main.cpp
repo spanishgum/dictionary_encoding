@@ -1,10 +1,10 @@
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include <ctime>
 #include <unistd.h>
 
-#include "dictionary.h"
-#include <vector>
+#include "rdf2btd.h"
 
 using namespace std;
 
@@ -16,37 +16,49 @@ int testSerializationOf(Dict *& D);
 
 int main(int argc, char **argv)
 {
-	std::string ifile = "/usr/share/dict/cracklib-small";
-	std::string ofile = "testOut.dict";
+	// std::string ifile = "/usr/share/dict/cracklib-small";
+	// std::string ofile = "testOut.dict";
 	
-	int opt;
-	string cmd_opts = "i:o:vh";
-	while ((opt = getopt(argc, argv, cmd_opts.c_str())) != -1)
-	{
-		switch (opt)
-		{
-			case 'i':
-				std::cout << "Input: " << "...\n";
-				break;
-			case 'o':
-				break;
-			case 'v':
-				break;
-			case 'h':
-				std::cout << "Help menu\n";
-				break;
-			case '?':
-			default:
-				std::cerr << "Command option " << (char) opt 
-					<< " not supported\n";
-				break;
-		}
-	}
+	std::string ifile = "nTriples.nt";
+	std::string ofile = "nTriples.btd";
+	
+	std::cout << "Building rdf2btd converter\n";
+	rdf2btd Converter(ifile, ofile);
 
-	Dict *D = new Dict(ifile, ofile);
+	std::cout << "Beginning transformation of " << ifile << " to " << ofile << "\n";
+	Converter.transform();
 	
-	testPopulationOf(D);
-	testSerializationOf(D);
+	
+	// int opt;
+	// string cmd_opts = "i:o:vh";
+	// while ((opt = getopt(argc, argv, cmd_opts.c_str())) != -1)
+	// {
+		// switch (opt)
+		// {
+			// case 'i':
+				// std::cout << "Input: " << "...\n";
+				// break;
+			// case 'o':
+				// break;
+			// case 'v':
+				// break;
+			// case 'h':
+				// std::cout << "Help menu\n";
+				// break;
+			// case '?':
+			// default:
+				// std::cerr << "Command option " << (char) opt 
+					// << " not supported\n";
+				// break;
+		// }
+	// }
+
+	
+	
+	// Dict *D = new Dict(ifile, ofile);
+	
+	// testPopulationOf(D);
+	// testSerializationOf(D);
 	
 	return 0;
 }
