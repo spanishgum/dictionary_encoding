@@ -1,5 +1,6 @@
 #include "trie.h"
 
+/* Function will be used as a constructor for Trie where the input is de-serialized*/
 Trie::Trie(std::string ifile, std::string ofile)
 {
 	this->save_file = ofile;
@@ -7,6 +8,7 @@ Trie::Trie(std::string ifile, std::string ofile)
 		this->deserialize(ifile);
 }
 
+/* Function will be Trie Destructor where it serializes a file and then clears the original file*/
 Trie::~Trie() 
 {
 	if (this->save_file.length())
@@ -14,6 +16,7 @@ Trie::~Trie()
 	this->clear();
 }
 
+/* Function will traverse to form the Trie tree */
 void Trie::traverse(Trie::Node *N, std::string s) 
 {
 	if (!N) return;
@@ -32,6 +35,7 @@ void Trie::traverse(Trie::Node *N, std::string s)
 	}
 }
 
+/* Function will go through the trie tree and delete the children recursively*/
 void Trie::clear_recursive(Trie::Node *N) 
 {
 	if (!N) return;
@@ -41,6 +45,9 @@ void Trie::clear_recursive(Trie::Node *N)
 	delete N;
 }
 
+/* Function will start at root within the header of Trie tree and go through 
+the children to find a match. If no match, return Null; otherwise, return N, 
+which is a Node*/
 Trie::Node *Trie::find(std::string s) 
 {
 	Trie::Node *N = this->root;
@@ -71,6 +78,12 @@ Trie::Node *Trie::find(std::string s)
 	return N;
 }
 
+/* Function will use  the Trie tree to insert into it. If there is another node
+same as the about to be inserted node, then that specific child corresponds to 
+the next character in the string that we are trying to insert. If no match in 
+any of the children, then insert at that node's children. When you are at the 
+final node, set the node to indicate that it corresponds to a string in the 
+Trie with a given ID. Return Node. */
 Trie::Node *Trie::insert(std::string s, unsigned int id) 
 {
 	Trie::Node *N = this->root;
@@ -97,7 +110,7 @@ Trie::Node *Trie::insert(std::string s, unsigned int id)
 		
 		if (!match) 
 		{
-			// heres where insert happens
+			// here's where insert happens
 			for (char &_c : s.substr(idx)) 
 			{
 				Trie::Node *_N = new Trie::Node(N, _c);
@@ -117,11 +130,60 @@ Trie::Node *Trie::insert(std::string s, unsigned int id)
 	return N;
 }
 
-// void Trie::insert(std::string s) 
-// {
-	// this->insert(s, 0);
-// }
+/* Function will use  the Trie tree to insert into it. If there is another node
+same as the about to be inserted node, then that specific child corresponds to 
+the next character in the string that we are trying to insert. If no match in 
+any of the children, then insert at that node's children. When you are at the 
+final node, set the node to indicate that it corresponds to a string in the 
+Trie with a given ID. Return Node. */
+void Trie::insert(std::string s) 
+ {
+ 	Trie::Node *N = this->root;
+	std::list<Trie::Node *>::iterator I = N->children.begin();
+	bool match = 0;
+	int idx = 0;
+	
+	if (s.length() < 1) 
+		return;
+	
+	for (char &c: s) 
+	{
+		while (I != N->children.end()) 
+		{
+			match = (c == (*I)->letter);
+			if (match) 
+			{
+				N = *I;
+				I = N->children.begin();
+				break;
+			}
+			++I;			
+		}
+		
+		if (!match) 
+		{
+			// here's where insert happens
+			for (char &_c : s.substr(idx)) 
+			{
+				Trie::Node *_N = new Trie::Node(N, _c);
+				N->children.push_back(_N);
+				N = _N;
+			}
+			break;
+		}
+		
+		match = 0;
+		++idx;
+	}
+	
+	N->isWord = true;	
+ }
 
+ /* Function finds the string. Then it will check to see if the node is empty 
+ or is the root. If so, return. Otherwise, set it being not a word. If there is
+ not children, For the  not root node and the parent node of root, if no
+ children and not a world, then remove the parent node and put the root node 
+ as the parent node. */
 void Trie::remove(std::string s) 
 {
 	Trie::Node *N = this->find(s), *_N;
@@ -145,7 +207,9 @@ void Trie::remove(std::string s)
 		}
 	}
 }
-
+ 
+ /* Function finds the string. Then it will check to see if the node is empty
+ or is the root. If so, return. Return false by default */
 bool Trie::contains(std::string s) 
 {
 	Trie::Node *N = find(s);
@@ -155,6 +219,9 @@ bool Trie::contains(std::string s)
 	return false;
 }
 
+ /* Function will check if the node is null or not a word; if so, return "". IF
+ the node is not a root, reverse the letter until you hit the parent. Finally 
+ reverse the letters and return the string.*/
 std::string Trie::getString(Node * N) 
 {
 	std::string reverse = "";
@@ -176,16 +243,19 @@ std::string Trie::getString(Node * N)
 	return reverse;
 }
 
+ /* Function will recursively clear the root and it's children*/
 void Trie::clear() 
 {
 	clear_recursive(this->root);
 }
 
+ /* Function will use traverse to traverse through the root*/
 void Trie::show() 
 {
 	traverse(this->root, "");
 }
 
+ /* Function will open a file and write the root info into the file in binary*/
 void Trie::serialize(std::string ofile) 
 {
 	std::ofstream ofs;
@@ -193,18 +263,35 @@ void Trie::serialize(std::string ofile)
 	writeNode(ofs, this->root);	
 }
 
+// Overload to handle writing to arbitrary output stream
+void Trie::serialize(std::ofstream& ofs) 
+{
+	if (ofs)
+	{
+		writeNode(ofs, this->root);
+	}
+	else
+	{
+		std::cerr << "Warning: Bad stream: Unable to serialize to file.";
+	}
+}
+
+ /* Function will write data as well as the size of the data to the file*/
 template <typename T>
 void Trie::writeData(std::ofstream& ofs, T data) 
 {
 	ofs.write(reinterpret_cast<const char *>(&data), sizeof(data));
 }
 
+ /* Function will read the data and the size of the data*/
 template <typename T>
 void Trie::readData(std::ifstream& ifs, T *data) 
 {
 	ifs.read(reinterpret_cast<char *>(data), sizeof(*data));
 }
 
+ /* Function will write in the file nodes id, letter, word, and children and 
+ children's children*/
 void Trie::writeNode(std::ofstream& ofs, Node *N) 
 {
 	if (!N) return;
@@ -224,6 +311,8 @@ void Trie::writeNode(std::ofstream& ofs, Node *N)
 		writeNode(ofs, child);
 }
 
+ /* Function will open the file and read the information from the file in 
+ binary*/
 void Trie::deserialize(std::string ifile) 
 {
 	std::ifstream ifs;
@@ -231,6 +320,23 @@ void Trie::deserialize(std::string ifile)
 	readNode(ifs);
 }
 
+/* Function will read the information from the file stream in
+ binary*/
+void Trie::deserialize(std::ifstream& ifs) 
+{
+	if (ifs)
+	{
+		readNode(ifs);
+	}
+	else
+	{
+		std::cerr << "Warning: Bad stream: Unable to deserialize file.";
+	}
+}
+
+ /* Function will read the node from the file and reads in the nodes ID, 
+ letter, word, and children. After the information is read, that particular
+ node is deleted. This continues until all the nodes are read in. */
 void Trie::readNode(std::ifstream& ifs) 
 {
 	do 

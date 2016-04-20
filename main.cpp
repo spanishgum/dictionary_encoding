@@ -14,6 +14,19 @@ void timeit(void(*)(void));
 int testPopulationOf(Dict *& D, std::string = "/usr/share/dict/cracklib-small");
 int testSerializationOf(Dict *& D);
 
+
+// vector<testfiles>
+// for t in ^
+//    rdf2btd(t, tout)
+//    rdf2hdt(t', tout')
+//    comparestats()
+
+// make testFolder
+
+
+
+
+
 int main(int argc, char **argv)
 {
 	// std::string ifile = "/usr/share/dict/cracklib-small";
@@ -24,9 +37,8 @@ int main(int argc, char **argv)
 	
 	std::cout << "Building rdf2btd converter\n";
 	rdf2btd Converter(ifile, ofile);
-
-	std::cout << "Beginning transformation of " << ifile << " to " << ofile << "\n";
-	Converter.transform();
+	Converter.run();
+	
 	
 	
 	// int opt;

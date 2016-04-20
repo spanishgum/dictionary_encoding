@@ -37,5 +37,7 @@ class Dict
 		void show();
 		
 		void serialize(std::string);
+		void serialize(std::ofstream&);
 		void deserialize(std::string);
+		void deserialize(std::ifstream&);
 };

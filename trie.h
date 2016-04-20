@@ -46,7 +46,7 @@ class Trie
 		Trie(std::string = "", std::string = "");
 		~Trie();
 		
-		// void insert(std::string);
+		void insert(std::string);
 		void remove(std::string);
 
 		std::string getString(Node *);
@@ -56,7 +56,9 @@ class Trie
 		void show();
 
 		void serialize(std::string);
+		void serialize(std::ofstream&);
 		void deserialize(std::string);
+		void deserialize(std::ifstream&);
 };
 
 

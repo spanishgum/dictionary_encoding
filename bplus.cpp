@@ -2,7 +2,7 @@
 #include "trie.h"
 #include <iostream>
 
-
+ /* Function will be B+ tree's constructor where nodes are initialized */
 template <typename Tkey, typename Tdat>
 Bplus<Tkey, Tdat>::Bplus() 
 {
@@ -10,12 +10,14 @@ Bplus<Tkey, Tdat>::Bplus()
 	root = NULL;
 }
 
+ /* Function will be B+ tree's destructor */
 template <typename Tkey, typename Tdat>
 Bplus<Tkey, Tdat>::~Bplus() 
 {
 	this->clear();
 }
 
+ /* Function will */
 template <typename Tkey, typename Tdat>
 typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::merge_iNodes(Bplus<Tkey, Tdat>::innerNode *N, Bplus<Tkey, Tdat>::Node *M, Bplus<Tkey, Tdat>::Node *P, unsigned int p_slot) 
 {

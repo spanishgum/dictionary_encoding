@@ -12,6 +12,7 @@ Dict::Dict(std::string i, std::string o)
 
 Dict::~Dict() 
 {
+	this->clear();
 	delete this->trie;
 	delete this->bplus;
 }
@@ -22,20 +23,27 @@ void Dict::insert(std::string s, unsigned int id)
 	this->bplus->insert(id, *tn);
 }
 
-unsigned int Dict::insert(std::string s) 
+unsigned int Dict::insert(std::string s)
 {
 	this->insert(s, this->size);
 	return this->size++;
 }
 
-void Dict::remove(std::string) 
+void Dict::remove(std::string s) 
 {
-
+	TNode *tn = this->trie->find(s);
+	if (this->bplus)
+	{
+		this->bplus->remove(tn->id);
+	}
 }
 
-void Dict::remove(unsigned int)
+void Dict::remove(unsigned int ui)
 {
-
+	if (this->bplus)
+	{
+		this->bplus->remove(ui);
+	}
 }
 
 int Dict::locate(std::string s) 
@@ -54,12 +62,8 @@ std::string Dict::extract(unsigned int id)
 
 void Dict::clear() 
 {
-	std::cout << "Clearing bplus\n";
 	this->bplus->clear();
-	std::cout << "Clearing trie\n";
-	this->trie->clear();
-	std::cout << "Dict is cleared\n";
-	
+	this->trie->clear();	
 }
 
 void Dict::show() 
@@ -68,12 +72,22 @@ void Dict::show()
 }
 
 
-void Dict::serialize(std::string file) 
+void Dict::serialize(std::string file)
 {
 	this->trie->serialize(file);
+}
+
+void Dict::serialize(std::ofstream& ofs)
+{
+	this->trie->serialize(ofs);
 }
 
 void Dict::deserialize(std::string file) 
 {
 	this->trie->deserialize(file);
+}
+
+void Dict::deserialize(std::ifstream& ifs) 
+{
+	this->trie->deserialize(ifs);
 }
