@@ -1,3 +1,23 @@
+/*
+*
+*    Dictionary Encoding and the RDF Storage Model
+*       by Adam Stallard , Aranya Ajith
+*          
+*    COP5725 Advanced Databases
+*       Spring 2016
+*
+*    "trie.h"
+*
+*     This source file
+*
+*
+*
+*
+*
+*
+*
+*/
+
 #include <iostream>
 #include <fstream>
 #include <vector>

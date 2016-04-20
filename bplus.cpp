@@ -1,8 +1,30 @@
+/*
+*
+*    Dictionary Encoding and the RDF Storage Model
+*       by Adam Stallard , Aranya Ajith
+*          
+*    COP5725 Advanced Databases
+*       Spring 2016
+*
+*    "trie.h"
+*
+*     This source file
+*
+*
+*
+*
+*
+*
+*
+*/
+
 #include "bplus.h"
 #include "trie.h"
 #include <iostream>
 
- /* Function will be B+ tree's constructor where nodes are initialized */
+// B+ tree's constructor
+// Sets everything to NULL and nothing is allocated
+//  until the first insertion
 template <typename Tkey, typename Tdat>
 Bplus<Tkey, Tdat>::Bplus() 
 {
@@ -10,16 +32,26 @@ Bplus<Tkey, Tdat>::Bplus()
 	root = NULL;
 }
 
- /* Function will be B+ tree's destructor */
+// B+ tree's destructor
+// Clears the tree before dipping to dealloacte pointers
+// This is done recursively in a depth first function
 template <typename Tkey, typename Tdat>
 Bplus<Tkey, Tdat>::~Bplus() 
 {
 	this->clear();
 }
 
- /* Function will */
+// Merges two inner Nodes of the tree together where
+//  N is left, M is right, and P is the parent Node
+// This occurs when there is an underflow among the Nodes
+//  typically a series of removals
 template <typename Tkey, typename Tdat>
-typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::merge_iNodes(Bplus<Tkey, Tdat>::innerNode *N, Bplus<Tkey, Tdat>::Node *M, Bplus<Tkey, Tdat>::Node *P, unsigned int p_slot) 
+typename Bplus<Tkey, Tdat>::remove_result 
+Bplus<Tkey, Tdat>::merge_iNodes(
+	Bplus<Tkey, Tdat>::innerNode *N, 
+	Bplus<Tkey, Tdat>::Node *M, 
+	Bplus<Tkey, Tdat>::Node *P, 
+	unsigned int p_slot) 
 {
 	N->keys[N->slots_used] = P->keys[p_slot];
 	M->slots_used++;
@@ -35,8 +67,16 @@ typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::merge_iNodes(Bplus<
 	return remove_result(ok);
 }
 
+// Merges two leaf Nodes of the tree together where
+//  N is left, M is right, and P is the parent Node
+// This occurs when there is an underflow among the Nodes
+//  typically a series of removals
 template <typename Tkey, typename Tdat>
-typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::merge_lNodes(Bplus<Tkey, Tdat>::leafNode *N, Bplus<Tkey, Tdat>::leafNode *M, Bplus<Tkey, Tdat>::Node *P)
+typename Bplus<Tkey, Tdat>::remove_result 
+Bplus<Tkey, Tdat>::merge_lNodes(
+	Bplus<Tkey, Tdat>::leafNode *N, 
+	Bplus<Tkey, Tdat>::leafNode *M, 
+	Bplus<Tkey, Tdat>::Node *P)
 {
 	std::copy(M->keys, M->keys + M->slots_used,
 		N->keys + N->slots_used);
@@ -56,8 +96,16 @@ typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::merge_lNodes(Bplus<
 	return remove_result(ok);
 }
 
+// Splits an inner Node (called iNode) of the tree apart where
+// This occurs when there is an overflow in the Node
+//  typically a series of insertions
 template <typename Tkey, typename Tdat>
-void Bplus<Tkey, Tdat>::split_iNodes(Bplus<Tkey, Tdat>::innerNode *iNode, Tkey *_newKey, Node **_newInner, unsigned int addSlot) 
+void 
+Bplus<Tkey, Tdat>::split_iNodes(
+	Bplus<Tkey, Tdat>::innerNode *iNode, 
+	Tkey *_newKey, 
+	Node **_newInner, 
+	unsigned int addSlot) 
 {
 	unsigned int mid = (iNode->slots_used >> 1);
 	innerNode *newInner = new innerNode();
@@ -78,8 +126,15 @@ void Bplus<Tkey, Tdat>::split_iNodes(Bplus<Tkey, Tdat>::innerNode *iNode, Tkey *
 	*_newInner = newInner;
 }
 
+// Splits a leaf Node (called lNode) of the tree apart where
+// This occurs when there is an overflow in the Node
+//  typically a series of insertions
 template <typename Tkey, typename Tdat>
-void Bplus<Tkey, Tdat>::split_lNodes(Bplus<Tkey, Tdat>::leafNode *lNode, Tkey *_newKey, Node **_newLeaf) 
+void 
+Bplus<Tkey, Tdat>::split_lNodes(
+	Bplus<Tkey, Tdat>::leafNode *lNode, 
+	Tkey *_newKey, 
+	Node **_newLeaf) 
 {
 	unsigned int mid = (lNode->slots_used >> 1);
 	leafNode *newLeaf = new leafNode();
@@ -110,8 +165,15 @@ void Bplus<Tkey, Tdat>::split_lNodes(Bplus<Tkey, Tdat>::leafNode *lNode, Tkey *_
 	*_newLeaf = newLeaf;
 }
 
+// A recursive solution to clearing the tree
+// Simply performas a depth first search through the 
+//  pointers to go to the leaves and begin deallocating
+//  the templated Tdat pointers at the end recursively removing
+//  the rest of the tree
 template <typename Tkey, typename Tdat>
-void Bplus<Tkey, Tdat>::clear_recursive(Bplus<Tkey, Tdat>::Node *N) 
+void 
+Bplus<Tkey, Tdat>::clear_recursive(
+	Bplus<Tkey, Tdat>::Node *N) 
 {
 	if (!N)
 		return;
@@ -136,8 +198,18 @@ void Bplus<Tkey, Tdat>::clear_recursive(Bplus<Tkey, Tdat>::Node *N)
 	}
 }
 
+// This is the recursive function for insertion
+// Since Bplus trees dont grow very large in height,
+//  but rather in width, the recursive approach is a 
+// good choice here
 template <typename Tkey, typename Tdat>
-typename Bplus<Tkey, Tdat>::Node * Bplus<Tkey, Tdat>::insert_recursive(Node *N, const Tkey &key, Tdat &dat, Tkey *splitKey, Node **splitNode) 
+typename Bplus<Tkey, Tdat>::Node * 
+Bplus<Tkey, Tdat>::insert_recursive(
+	Node *N, 
+	const Tkey &key, 
+	Tdat &dat, 
+	Tkey *splitKey, 
+	Node **splitNode) 
 {
 
 	if (N == NULL) 
@@ -227,16 +299,25 @@ typename Bplus<Tkey, Tdat>::Node * Bplus<Tkey, Tdat>::insert_recursive(Node *N, 
 	}
 }
 
+// The traversal function makes an attempt to print each Node in a
+//  depth first recursive ordering. It is'nt very pretty for large 
+//  trees but useful for debugging on small ones
 template <typename Tkey, typename Tdat>
-void Bplus<Tkey, Tdat>::traverse(Bplus<Tkey, Tdat>::Node *N)
+void 
+Bplus<Tkey, Tdat>::traverse(
+	Bplus<Tkey, Tdat>::Node *N)
 {
 	this->printNode(N);
 	for (int key = 0; key < N->slots_used; ++key)
 		traverse(static_cast<Bplus<Tkey, Tdat>::Node *>(N->pointers[key]));
 }
 
+// Simple print utility to show contents of a single Node
+// Good for debugging and called by traverse
 template <typename Tkey, typename Tdat>
-void Bplus<Tkey, Tdat>::printNode(Bplus<Tkey, Tdat>::Node *N)
+void 
+Bplus<Tkey, Tdat>::printNode(
+	Bplus<Tkey, Tdat>::Node *N)
 {
 	if (!N) return;
 	std::cout << "----------------------------------------------\n|";
@@ -266,8 +347,17 @@ void Bplus<Tkey, Tdat>::printNode(Bplus<Tkey, Tdat>::Node *N)
 	std::cout << "\n----------------------------------------------\n";
 }
 
+// Simple find command which dives into the tree
+//  by searching on key slots
+//  and choosing pointer slots to travsere into
+//  Once at the leaf Node, it will find the correct index for 
+//  the key maps to. This does not guarentee the pointer
+//  is valid however so our dictionary object must make
+//  a NULL ptr check
 template <typename Tkey, typename Tdat>
-Tdat * Bplus<Tkey, Tdat>::find(Tkey key) 
+Tdat * 
+Bplus<Tkey, Tdat>::find(
+	Tkey key) 
 {
 	Node *N = this->root;
 	if (!N) return NULL;
@@ -283,8 +373,14 @@ Tdat * Bplus<Tkey, Tdat>::find(Tkey key)
 	return static_cast<Tdat *>(N->pointers[slot]);
 }
 
+// Wrapper for the recursive insertion function to handle things
+//  like null ptrs, starting at the root, and creating a new 
+//  root if a original was split
 template <typename Tkey, typename Tdat>
-typename Bplus<Tkey, Tdat>::Node *Bplus<Tkey, Tdat>::insert(Tkey &key, Tdat &dat) 
+typename Bplus<Tkey, Tdat>::Node *
+Bplus<Tkey, Tdat>::insert(
+	Tkey &key, 
+	Tdat &dat) 
 {
 	Node *newChild = NULL;
 	Tkey newKey = Tkey();
@@ -310,17 +406,37 @@ typename Bplus<Tkey, Tdat>::Node *Bplus<Tkey, Tdat>::insert(Tkey &key, Tdat &dat
 	return return_val;
 }
 
+// Wrapper for the removal function to handle things
+//  like null ptrs, and starting at the root
 template <typename Tkey, typename Tdat>
-typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::remove(Tkey key)
+typename Bplus<Tkey, Tdat>::remove_result 
+Bplus<Tkey, Tdat>::remove(
+	Tkey key)
 {
 	if (!this->root) 
-		return remove_result(ok); ////////////////////////////////////////////////////////
+		return remove_result(ok);
 	remove_result rr = remove_recursive(key, this->root, NULL, NULL, NULL, NULL, NULL, 0);
 	return rr;
 }
 
+// The recursive removal function which searches down the 
+//  tree by iterating over pointer slots and choosing the correct 
+//  traversal path. If the key is found, the corresponding 
+//  pointer is removed. The dictionary does not use this functionality
+//  for our test however in that situation it would have to handle 
+//  removing the corresponding string from the Trie and reallocating
+//  ID values for new strings
 template <typename Tkey, typename Tdat>
-typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::remove_recursive(Tkey key, Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tdat>::Node *L, Bplus<Tkey, Tdat>::Node *R, Bplus<Tkey, Tdat>::Node *LP, Bplus<Tkey, Tdat>::Node *RP, Bplus<Tkey, Tdat>::Node *P, unsigned int p_slot)
+typename Bplus<Tkey, Tdat>::remove_result 
+Bplus<Tkey, Tdat>::remove_recursive(
+	Tkey key, 
+	Bplus<Tkey, Tdat>::Node *N, 
+	Bplus<Tkey, Tdat>::Node *L, 
+	Bplus<Tkey, Tdat>::Node *R, 
+	Bplus<Tkey, Tdat>::Node *LP, 
+	Bplus<Tkey, Tdat>::Node *RP, 
+	Bplus<Tkey, Tdat>::Node *P, 
+	unsigned int p_slot)
 {
 	if (N->isleaf)
 	{
@@ -541,8 +657,16 @@ typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::remove_recursive(Tk
 	}
 }
 
+// This is a utility function which essentially shifts
+//  key and pointer data over from one leaf to its left neighbor
+//  using std copy functions
 template <typename Tkey, typename Tdat>
-typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::shift_lNodeL(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tdat>::Node *M, Bplus<Tkey, Tdat>::Node *P, unsigned int p_slot)
+typename Bplus<Tkey, Tdat>::remove_result 
+Bplus<Tkey, Tdat>::shift_lNodeL(
+	Bplus<Tkey, Tdat>::Node *N, 
+	Bplus<Tkey, Tdat>::Node *M, 
+	Bplus<Tkey, Tdat>::Node *P, 
+	unsigned int p_slot)
 {
 	unsigned int shiftnum = (M->slots_used - N->slots_used) >> 1;
 
@@ -571,8 +695,16 @@ typename Bplus<Tkey, Tdat>::remove_result Bplus<Tkey, Tdat>::shift_lNodeL(Bplus<
 	}
 }
 
+// This is a utility function which essentially shifts 
+//  key and pointer data over from one leaf to its right neighbor
+//  using std copy functions
 template <typename Tkey, typename Tdat>
-void Bplus<Tkey, Tdat>::shift_lNodeR(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tdat>::Node *M, Bplus<Tkey, Tdat>::Node *P, unsigned int p_slot)
+void 
+Bplus<Tkey, Tdat>::shift_lNodeR(
+	Bplus<Tkey, Tdat>::Node *N, 
+	Bplus<Tkey, Tdat>::Node *M, 
+	Bplus<Tkey, Tdat>::Node *P, 
+	unsigned int p_slot)
 {
 	unsigned int shiftnum = (N->slots_used - M->slots_used) >> 1;
 
@@ -600,8 +732,16 @@ void Bplus<Tkey, Tdat>::shift_lNodeR(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tda
 	P->keys[p_slot] = N->keys[N->slots_used - 1];
 }
 
+// This is a utility function which essentially shifts 
+//  key and pointer data over from one inner Node to its 
+// left neighbor using std copy functions
 template <typename Tkey, typename Tdat>
-void Bplus<Tkey, Tdat>::shift_iNodeL(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tdat>::Node *M, Bplus<Tkey, Tdat>::Node *P, unsigned int p_slot)
+void 
+Bplus<Tkey, Tdat>::shift_iNodeL(
+	Bplus<Tkey, Tdat>::Node *N, 
+	Bplus<Tkey, Tdat>::Node *M, 
+	Bplus<Tkey, Tdat>::Node *P, 
+	unsigned int p_slot)
 {
 	unsigned int shiftnum = (M->slots_used - N->slots_used) >> 1;
 	
@@ -625,8 +765,16 @@ void Bplus<Tkey, Tdat>::shift_iNodeL(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tda
 	M->slots_used -= shiftnum;
 }
 
+// This is a utility function which essentially shifts 
+//  key and pointer data over from one inner Node to its 
+// right neighbor using std copy functions
 template <typename Tkey, typename Tdat>
-void Bplus<Tkey, Tdat>::shift_iNodeR(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tdat>::Node *M, Bplus<Tkey, Tdat>::Node *P, unsigned int p_slot)
+void 
+Bplus<Tkey, Tdat>::shift_iNodeR(
+	Bplus<Tkey, Tdat>::Node *N, 
+	Bplus<Tkey, Tdat>::Node *M, 
+	Bplus<Tkey, Tdat>::Node *P, 
+	unsigned int p_slot)
 {
 	unsigned int shiftnum = (M->slots_used - N->slots_used) >> 1;
 	
@@ -649,18 +797,42 @@ void Bplus<Tkey, Tdat>::shift_iNodeR(Bplus<Tkey, Tdat>::Node *N, Bplus<Tkey, Tda
 	N->slots_used -= shiftnum;
 }
 
+// Simple wrapper for public use which always starts
+// the clear at the root
 template <typename Tkey, typename Tdat>
-void Bplus<Tkey, Tdat>::clear() 
+void 
+Bplus<Tkey, Tdat>::clear() 
 {
-	clear_recursive(this->root);
+	if (this->root)
+	{
+		clear_recursive(this->root);
+	}
 }
 
+// Simple wrapper for public use which always starts
+// the traverse at the root
 template <typename Tkey, typename Tdat>
-void Bplus<Tkey, Tdat>::show() 
+void 
+Bplus<Tkey, Tdat>::show() 
 {
-	this->traverse(this->root);
+	if (this->root)
+	{
+		this->traverse(this->root);
+	}
 }
 
-template class Bplus<int, int>;
-template class Bplus<int, Trie::Node>;
+
+
+
+// Instantiate templates for the dictionary object
+// We need to have the Bplus tree index on the Trie Node IDs
+//  which represent the mapping for a string i.e. a (S,O,P) triple
+// So we instantiate our key as a simple unsigned int for simple
+//  counting, but we must set the data pointer type at the leaf Nodes
+//  to point to the Nodes in our trie structure.
+// The dictionary object constructs this for us using this template
 template class Bplus<unsigned int, Trie::Node>;
+
+// Testing
+// template class Bplus<int, int>;
+// template class Bplus<int, Trie::Node>;

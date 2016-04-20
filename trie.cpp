@@ -1,3 +1,23 @@
+/*
+*
+*    Dictionary Encoding and the RDF Storage Model
+*       by Adam Stallard , Aranya Ajith
+*          
+*    COP5725 Advanced Databases
+*       Spring 2016
+*
+*    "trie.h"
+*
+*     This source file
+*
+*
+*
+*
+*
+*
+*
+*/
+
 #include "trie.h"
 
 /* Function will be used as a constructor for Trie where the input is de-serialized*/
