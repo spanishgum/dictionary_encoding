@@ -39,6 +39,7 @@ vector<string> getLinesFrom(string path);
 
 // prototypes to run quick tests
 void runQuickTest_Dict(string path);
+void runQuickTest_Dict2(string path);
 
 // print simple usage error to screen
 void usage_err()
@@ -49,8 +50,8 @@ void usage_err()
 
 int main(int argc, char **argv)
 {
-	std::string ifile = "../nTriples.nt";
-	std::string ofile = "../nTriples.btd";
+	std::string ifile = "tests/nTriples.nt";
+	std::string ofile = "tests/nTriples.btd";
 	bool iflag = 0, oflag = 0;
 	
 	if (argc < 1) 
@@ -60,16 +61,20 @@ int main(int argc, char **argv)
 	
 	for (int i = 0; i < argc; ++i)
 	{
+		if (strcmp(argv[i], "-d3") == 0)
+		{
+			runQuickTest_Dict2("tests/linux_dict");
+		}
 		if (strcmp(argv[i], "-d2") == 0)
 		{
-			ifile = "../nTriples.nt";
-			ofile = "../nTriples.btd";
+			ifile = "tests/nTriples.nt";
+			ofile = "tests/nTriples.btd";
 			iflag = oflag = 1;
 			break;
 		}
 		if (strcmp(argv[i], "-d1") == 0) 
 		{
-			runQuickTest_Dict("/usr/share/dict/cracklib-small");
+			runQuickTest_Dict("tests/linux_dict");
 		}
 		else if (strcmp(argv[i], "-h") == 0) 
 		{
@@ -198,8 +203,54 @@ void runQuickTest_Dict(string path)
 		}
 		++i;
 	}
+	
 	cout << "Testing dictionary serialization to tests/serialize.test\n";
+	
 	D->serialize("tests/serialize.test");
+	
+	
+	// cout << "Done\n\nTesting dictionary deserialization from tests/serialize.test\n";
+	// D->deserialize("tests/serialize.test");
+	// cout << "Done.\n";
+}
+
+
+void runQuickTest_Dict2(string path)
+{
+	unsigned int i = 0;
+	if (!fileExists(path)) return;
+	Dict *D = new Dict();
+	vector<string> dat = getLinesFrom(path);
+	vector<unsigned int> ids;
+	cout << "Beginning simple dictionary object test . . .\nLoading . . .\n";
+	for (auto str : dat)
+	{
+		ids.push_back(D->insert(str));
+	}
+	cout << "Testing Locate(string) and Extract(id) for simple dictionary . . .\n";
+	for (auto str : dat)
+	{
+		if (rand() % (int) (1 + (dat.size() / 1000)))
+		{
+			cout << "Locate(" << str << "): " << D->locate(str) << endl;
+			cout << "Extract(" << i << "): " << D->extract(i) << endl;
+			if (!D->extract(i).compare(str))
+			{
+				cout << "\tGOOD\n";
+			}
+			else
+			{
+				cout << "\tBAD\n";
+			}
+		}
+		++i;
+	}
+	
+	cout << "Testing dictionary serialization to tests/serialize.test\n";
+	
+	D->serialize("tests/serialize.test");
+	
+	
 	cout << "Done\n\nTesting dictionary deserialization from tests/serialize.test\n";
 	D->deserialize("tests/serialize.test");
 	cout << "Done.\n";
