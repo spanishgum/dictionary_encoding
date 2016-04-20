@@ -196,10 +196,13 @@ void rdf2btd::readData(std::ifstream& ifs, T *data)
 //   serialized dictionary
 void rdf2btd::save(std::string _ofile)
 {
-
 	// open an output stream in binary mode
 	std::ofstream ofs;
 	ofs.open(_ofile, std::ios::out | std::ios::binary);
+	this->dict->serialize(ofs);
+	ofs.close();
+	
+	return; ////////// COULDNT FIGURE OUT THIS BELOW
 	
 	// first write the number of triples in the header
 	unsigned int num_triples = this->ctriples.size();
