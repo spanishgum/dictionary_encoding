@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 			iflag = oflag = 1;
 			break;
 		}
-		if (strcmp(argv[i], "-d") == 0) 
+		if (strcmp(argv[i], "-d1") == 0) 
 		{
 			runQuickTest_Dict("/usr/share/dict/cracklib-small");
 		}
