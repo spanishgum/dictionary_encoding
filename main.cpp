@@ -15,18 +15,6 @@ int testPopulationOf(Dict *& D, std::string = "/usr/share/dict/cracklib-small");
 int testSerializationOf(Dict *& D);
 
 
-// vector<testfiles>
-// for t in ^
-//    rdf2btd(t, tout)
-//    rdf2hdt(t', tout')
-//    comparestats()
-
-// make testFolder
-
-
-
-
-
 int main(int argc, char **argv)
 {
 	// std::string ifile = "/usr/share/dict/cracklib-small";
