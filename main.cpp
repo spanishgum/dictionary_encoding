@@ -60,6 +60,13 @@ int main(int argc, char **argv)
 	
 	for (int i = 0; i < argc; ++i)
 	{
+		if (strcmp(argv[i], "-d2") == 0)
+		{
+			ifile = "../nTriples.nt";
+			ofile = "../nTriples.btd";
+			iflag = oflag = 1;
+			break;
+		}
 		if (strcmp(argv[i], "-d") == 0) 
 		{
 			runQuickTest_Dict("/usr/share/dict/cracklib-small");
@@ -100,7 +107,8 @@ int main(int argc, char **argv)
 	
 	
 	// We have both -i and -o files and will run the converter over it
-	std::cout << "Building rdf2btd converter\n";
+	std::cout << "Building rdf2btd converter using" << ifile 
+		<< " to produce " << ofile << "\n";
 	rdf2btd Converter(ifile, ofile);
 	Converter.run();
 	
