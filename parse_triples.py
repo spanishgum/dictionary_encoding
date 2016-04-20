@@ -1,3 +1,14 @@
+# Dictionary encoding 
+#   by Adam Stallard and Aranya Ajith#
+#
+#  COP5725 Advanced Databases
+#  Spring 2016
+#
+#  Simple utility to get links from a file and sort them by size
+#  This is used so we can test files from small -> large
+#
+##########################################################################
+
 #
 # standard libs for typical io / file handling
 import os, sys, argparse
