@@ -1,0 +1,11 @@
+http://downloads.dbpedia.org/3.4/en/instancetype_en.nt.bz2
+http://downloads.dbpedia.org/3.4/en/newstrictmappingbased_en.nt.bz2
+http://downloads.dbpedia.org/3.4/en/oldlenientmappingbased_en.nt.bz2
+http://downloads.dbpedia.org/3.4/en/shortabstract_en.nt.bz2
+http://downloads.dbpedia.org/3.4/en/longabstract_en.nt.bz2
+http://downloads.dbpedia.org/3.4/en/articlecategories_en.nt.bz2
+http://downloads.dbpedia.org/3.4/en/externallinks_en.nt.bz2
+http://downloads.dbpedia.org/3.4/en/infobox_en.nt.bz2
+http://downloads.dbpedia.org/3.4/en/infoboxproperties_en.nt.bz2
+http://downloads.dbpedia.org/3.4/en/homepage_en.nt.bz2
+http://downloads.dbpedia.org/3.4/en/pagelinks_en.nt.bz2
