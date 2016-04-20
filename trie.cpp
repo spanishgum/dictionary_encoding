@@ -18,13 +18,30 @@
 *
 */
 
+#define DEBUG true
+
 #include "trie.h"
+
+/* Function will be used as a constructor for Trie where the input is de-serialized*/
+Trie::Trie()
+{
+	this->root = new Node();
+	this->save_file = "";
+}
+
+/* Function will be used as a constructor for Trie where the input is de-serialized*/
+Trie::Trie(std::string ofile)
+{
+	this->root = new Node();
+	this->save_file = ofile;
+}
 
 /* Function will be used as a constructor for Trie where the input is de-serialized*/
 Trie::Trie(std::string ifile, std::string ofile)
 {
+	this->root = new Node();
 	this->save_file = ofile;
-	if (ifile.length())
+	if (this->fileExists(ifile))
 		this->deserialize(ifile);
 }
 
@@ -34,6 +51,19 @@ Trie::~Trie()
 	if (this->save_file.length())
 		this->serialize(this->save_file);
 	this->clear();
+}
+
+// Simple utility to chech if a file exists
+bool Trie::fileExists(std::string path)
+{
+	std::ifstream ifs;
+	ifs.open(path, std::ios::in | std::ios::binary);
+	if (!ifs)
+	{
+		return false;
+	}
+	ifs.close();
+	return true;
 }
 
 /* Function will traverse to form the Trie tree */

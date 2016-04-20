@@ -46,6 +46,8 @@ class Trie
 		Node *root;
 		std::string save_file;
 		
+		bool fileExists(std::string);
+		
 		void clear_recursive(Node *);
 		void traverse(Node *, std::string);
 
@@ -63,7 +65,9 @@ class Trie
 
 	public:
 	
-		Trie(std::string = "", std::string = "");
+		Trie();
+		Trie(std::string);
+		Trie(std::string, std::string);
 		~Trie();
 		
 		void insert(std::string);

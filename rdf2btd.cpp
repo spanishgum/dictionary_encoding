@@ -150,7 +150,7 @@ void rdf2btd::compress(std::string _tfile)
 	TripleCompressor compressor(*this);
 	
 	// init the dictionary object
-	this->dict = new Dict();
+	this->dict = new Dict(this->ofile);
 	
 	// open and verify the intermediate file before streaming
 	ifs.open(_tfile, std::ios::in);
@@ -199,10 +199,10 @@ void rdf2btd::save(std::string _ofile)
 	// open an output stream in binary mode
 	std::ofstream ofs;
 	ofs.open(_ofile, std::ios::out | std::ios::binary);
-	this->dict->serialize(ofs);
+	this->dict->serialize(_ofile);
 	ofs.close();
 	
-	return; ////////// COULDNT FIGURE OUT THIS BELOW
+	return; ////////// FOR SOME REASON THIS BROKE :(
 	
 	// first write the number of triples in the header
 	unsigned int num_triples = this->ctriples.size();

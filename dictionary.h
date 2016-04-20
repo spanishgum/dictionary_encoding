@@ -40,10 +40,19 @@ class Dict
 		void insert(std::string, unsigned int);
 		
 		std::string ifile, ofile;
+		bool fileExists(std::string);
+		
+		inline bool status_good()
+		{
+			return (this->trie && this->bplus);
+		}
+		
 		
 	public:
-	
-		Dict(std::string = "", std::string = "");
+		
+		Dict();
+		Dict(std::string);
+		Dict(std::string, std::string);
 		~Dict();
 		
 		unsigned int insert(std::string);
