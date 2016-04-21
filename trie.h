@@ -22,7 +22,7 @@
 #define TRIE_H
 
 #include <cstdlib>
-#include <list>
+#include <set>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -36,11 +36,12 @@ class Trie
 			char letter;
 			bool isWord;
 			unsigned int id;
-			std::list<Node *> children;
+			std::set<Node *> children;
 			
 			inline Node(Node *p = nullptr, char c = '\0')
 				: parent(p), letter(c), isWord(0), id(0), children() 
 			{ }
+			
 		};
 
 		Node *root;

@@ -60,7 +60,7 @@ Trie::~Trie()
 bool Trie::fileExists(std::string path)
 {
 	std::ifstream ifs;
-	ifs.open(path, std::ios::in | std::ios::binary);
+	ifs.open(path);
 	if (!ifs)
 	{
 		return false;
@@ -73,7 +73,7 @@ bool Trie::fileExists(std::string path)
 void Trie::traverse(Trie::Node *N, std::string s) 
 {
 	if (N == nullptr) return;
-	std::list<Trie::Node *>::iterator I = N->children.begin();
+	std::set<Trie::Node *>::iterator I = N->children.begin();
 	
 	std::cout << N->letter << std::endl;
 	if (N->isWord) 
@@ -92,9 +92,10 @@ void Trie::traverse(Trie::Node *N, std::string s)
 void Trie::clear_recursive(Trie::Node *N) 
 {
 	if (N == nullptr) return;
-	typedef typename std::list<Trie::Node *>::iterator itr;
+	typedef typename std::set<Trie::Node *>::iterator itr;
 	for (itr I = N->children.begin(); I != N->children.end(); ++I)
 		clear_recursive(*I);
+	N->children.clear();
 	delete N;
 }
 
@@ -105,7 +106,7 @@ Trie::Node *Trie::find(std::string s)
 {
 	Trie::Node *N = this->root;
 	if (N == nullptr) return nullptr;
-	std::list<Trie::Node *>::iterator I = N->children.begin();
+	std::set<Trie::Node *>::iterator I = N->children.begin();
 	bool match = 0;
 
 	if (s.length() < 1) 
@@ -145,7 +146,7 @@ Trie::Node *Trie::insert(std::string s, unsigned int id)
 	{
 		return nullptr;
 	}
-	std::list<Trie::Node *>::iterator I = N->children.begin();
+	std::set<Trie::Node *>::iterator I = N->children.begin();
 	bool match = 0;
 	int idx = 0;
 	
@@ -172,7 +173,7 @@ Trie::Node *Trie::insert(std::string s, unsigned int id)
 			for (char &_c : s.substr(idx)) 
 			{
 				Trie::Node *_N = new Trie::Node(N, _c);
-				N->children.push_back(_N);
+				N->children.insert(_N);
 				N = _N;
 			}
 			break;
@@ -201,7 +202,7 @@ void Trie::insert(std::string s)
 	{
 		return;
 	}
-	std::list<Trie::Node *>::iterator I = N->children.begin();
+	std::set<Trie::Node *>::iterator I = N->children.begin();
 	bool match = 0;
 	int idx = 0;
 	
@@ -228,7 +229,7 @@ void Trie::insert(std::string s)
 			for (char &_c : s.substr(idx)) 
 			{
 				Trie::Node *_N = new Trie::Node(N, _c);
-				N->children.push_back(_N);
+				N->children.insert(_N);
 				N = _N;
 			}
 			break;
@@ -262,7 +263,7 @@ void Trie::remove(std::string s)
 		{
 			if (N->children.empty() && !N->isWord) 
 			{
-				_N->children.remove(N);
+				_N->children.erase(N);
 				N = _N;				
 			}
 			else 
@@ -398,6 +399,7 @@ void Trie::writeNode(std::ofstream& ofs, Node *N)
  binary*/
 void Trie::deserialize(std::string ifile)
 {
+	return;
 	// first clear the current tree and then reset the root
 	this->clear();
 	if (this->root == nullptr)
@@ -414,6 +416,7 @@ void Trie::deserialize(std::string ifile)
  binary*/
 void Trie::deserialize(std::ifstream& ifs) 
 {
+	return;
 	if (ifs)
 	{
 		readNode(ifs, this->root);
@@ -429,6 +432,7 @@ void Trie::deserialize(std::ifstream& ifs)
  node is deleted. This continues until all the nodes are read in. */
 void Trie::readNode(std::ifstream& ifs, Node *N)
 {
+	return;
 	if (DEBUG)
 	{
 		std::cerr << "Ignoring invocation of deserialization for debugging.\n";
