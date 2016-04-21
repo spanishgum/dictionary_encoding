@@ -36,7 +36,7 @@ def get_test(i, (l,s)):
 def run_test(i, s, nt):
 	
 	# Print a synopsis of the current test
-	synopsis = '\nTest {:02d} : Size {:>10} KB : {:>35}\n'.format(i, s, nt)
+	synopsis = '\n  # {:02d} : Size {:>12} KB : {:>40}\n'.format(i, s, nt)
 	
 	# Get names of test files
 	btd_file = nt + '.btd'
@@ -70,9 +70,9 @@ def run_test(i, s, nt):
 	hdt_comp_r = (hdt_size / nt_size)
 
 	# Format results into a nice string
-	border = '----------------------------------------------------------------------\n'
-	btd_res = ' BTD\t{:<5} : {:05.1f} : {:08d} : {:4.4f}\n'.format(btd_file, btd_time, btd_size, btd_comp_r)
-	hdt_res = ' HDT\t{:<5} : {:05.1f} : {:08d} : {:4.4f}\n'.format(hdt_file, hdt_time, hdt_size, hdt_comp_r)
+	border = '--------------------------------------------------------------------------\n'
+	btd_res = ' BTD\t{:<5} : {:05.1f} : {:10d} : {:4.3f}\n'.format(btd_file, btd_time, btd_size, btd_comp_r)
+	hdt_res = ' HDT\t{:<5} : {:05.1f} : {:10d} : {:4.3f}\n'.format(hdt_file, hdt_time, hdt_size, hdt_comp_r)
 	
 	# Record results
 	print synopsis, border, btd_res, hdt_res
