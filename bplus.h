@@ -34,30 +34,28 @@ class Bplus
 
 		static const unsigned int 
 			max_slots = Bmax(8, CACHE_LINE_SIZE / (sizeof(Tkey) + sizeof(void *))),
-			// max_slots = 4,
 			min_slots = (max_slots / 2);
 
 		struct Node
 		{
+			bool isleaf;
+			unsigned int slots_used;
 			Tkey *keys;
 			void **pointers;
-			unsigned int slots_used;
-			bool isleaf;
 			
-			inline Node(bool _isleaf) 
+			inline Node(bool l)
+				: isleaf(l), slots_used(0)
 			{
 				keys = new Tkey[max_slots];
 				pointers = new void *[max_slots + 1];
-				isleaf = _isleaf;
-				slots_used = 0;
 		
 				for (int i = 0; i < max_slots; ++i) 
 				{
 					keys[i] = Tkey();
-					pointers[i] = NULL;
+					pointers[i] = nullptr;
 				}
 				
-				pointers[max_slots] = NULL;
+				pointers[max_slots] = nullptr;
 			}
 			
 			inline bool isfull() const 
@@ -86,25 +84,28 @@ class Bplus
 		{
 			struct leafNode *prev, *next;
 			inline leafNode()
-				: Node(true), prev(NULL), next(NULL) {}
+				: Node(true), prev(nullptr), next(nullptr) {}
 		};		
 		
-		Node *root;
-		Node *headLeaf, *tailLeaf;
+		Node *root, *headLeaf, *tailLeaf;
 
 		inline int lower_key_idx(const Node *N, const Tkey& key) const 
 		{
 			int lo = 0;
 			while (lo < N->slots_used && (N->keys[lo] < key)) 
+			{
 				++lo;
+			}
 			return lo;
 		}
 		
 		inline int upper_key_idx(const Node *N, const Tkey& key) const 
 		{
 			int lo = N->slots_used;
-			while (lo < N->slots_used && (N->keys[lo] <= key)) 
+			while (lo < N->slots_used && (N->keys[lo] <= key))
+			{
 				++lo;
+			}
 			return lo;
 		}
 

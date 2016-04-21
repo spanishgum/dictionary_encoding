@@ -24,18 +24,31 @@
 #define PYTHON "/usr/bin/python"
 #define PY_N3_PARSER "parse_triples.py"
 
-rdf2btd::rdf2btd(std::string i, std::string o)
+// Initializes contextual information structures needed
+//  to transform a .nt file into a .btd file
+// If the provided input path does not exist,
+//  then exit
+rdf2btd::rdf2btd(std::string i, std::string o, std::string t)
+	: ifile(i), ofile(o), tfile(t), 
+		n3parser(PY_N3_PARSER), ctriples()
 {
-	this->ifile = i;
-	this->tfile = i + TEMP_EXT;
-	this->ofile = o;
-	this->n3parser = PY_N3_PARSER;
+	this->dict = new Dict(this->ofile);
+	if (!this->dict->fileExists(this->ifile))
+	{
+		std::cerr << "Fatal Error: Could not open input file.\n";
+		exit(-1);
+	}
 }
 
+// Makes a safety check that dict didnt die
+//  but otherwise clears it and deletes it
 rdf2btd::~rdf2btd()
 {
-	this->dict->clear();
-	delete this->dict;
+	if (this->dict != nullptr)
+	{
+		this->dict->clear();
+		delete this->dict;
+	}
 }
 
 // This function simply calls the core functions of rdf2btd
@@ -43,10 +56,19 @@ rdf2btd::~rdf2btd()
 //  the output
 void rdf2btd::run()
 {
+	// begin by calling the subprocess transform
+	//  which will create out tmp file for 
+	//  character elimination and easier parsing
 	std::cout << "Transforming input\n";
 	this->transform(this->ifile, this->tfile);
+	
+	// With the tmp file created, initiate
+	//  the compression stage
 	std::cout << "Compressing transformation\n";
 	this->compress(this->tfile);
+	
+	// After compression occurs and the dictionary is loaded
+	//  we export to a binary file through serialization
 	std::cout << "Writing compressed file\n";
 	this->save(this->ofile);
 }
@@ -159,12 +181,12 @@ void rdf2btd::compress(std::string _tfile)
 	{
 		// loop over the line separated S,P,O values
 		//  insert each one into the dictionary and get the mapped value
-		for (int i = 0; i < 3; ++i)
+		for (int i = Subject; i != End; ++i)
 		{
 			// double check file and get line
 			verify_file(ifs, "Fatal Error: Intermediate file corruption.");
 			std::getline(ifs, line_triplet[i]);
-			next_cTriple.get(i) = compressor(line_triplet[i]);
+			next_cTriple.get(static_cast<tri_idx>(i)) = compressor(line_triplet[i]);
 		}
 	}
 	ifs.close();
@@ -214,9 +236,9 @@ void rdf2btd::save(std::string _ofile)
 	{
 		// iterate over S,P,O
 		// write unsigned int value to binary output
-		for (int i = 0; i < 3; ++i)
+		for (int i = Subject; i != End; ++i)
 		{
-			this->writeData(ofs, ctI->get(i));
+			this->writeData(ofs, ctI->get(static_cast<tri_idx>(i)));
 		}
 	}
 	
@@ -252,7 +274,7 @@ void rdf2btd::load(std::string _ifile)
 			// Just make sure our input stream hasnt gone whacky
 			//  before reading more bytes
 			verify_file(ifs, "Fatal Error: Load file corruption.");
-			this->readData(ifs, ctriple.getptr(i));
+			this->readData(ifs, ctriple.getptr(static_cast<tri_idx>(i)));
 		}
 		
 		// push the loaded triple to the triple vector

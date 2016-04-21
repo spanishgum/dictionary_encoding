@@ -31,11 +31,15 @@
 #include <algorithm>
 
 
+#define TMP_FILE "tests/.rdf2btd_tmp"
+
 
 class rdf2btd 
 {
 	
-
+	// enumerate the elements of a triple
+	enum tri_idx { Subject, Predicate, Object, End };
+	
 	// The following struct provides constant indices
 	//  into the above tuple types.
 	struct CompressedTriple
@@ -46,38 +50,31 @@ class rdf2btd
 		
 		unsigned int data[3];
 		
-		unsigned int &get(const unsigned int i)
+		// init the array to 0s
+		inline CompressedTriple()
+			: data{} { }
+		
+		// get a reference to an element
+		unsigned int &get(tri_idx i)
 		{
-			if (i < 3)
-			{
-				return data[i];
-			}
-			else
-			{
-				std::string msg = "Invalid request for CompressedTriple member";
-				fatal_err(msg, 1);
-			}
-			return data[0]; // shuts up compiler
+			// tri_idx will always be 0 <= i < 3
+			return data[i];
 		}
 		
-		unsigned int *getptr(const unsigned int i)
+		// get a ptr to an element
+		unsigned int *getptr(tri_idx i)
 		{
-			if (i < 3)
-			{
-				return &data[i];
-			}
-			else
-			{
-				std::string msg = "Invalid request for CompressedTriple member";
-				fatal_err(msg, 1);
-			}
-			return NULL; // dont need to shut up compiler :)
+			// tri_idx will always be 0 <= i < 3
+			return &data[i];
 		}
 		
 	};
 	
-	struct TripleCompressor 
+	// Syntax sugar functor that makes the nullptr check
+	//  for us
+	struct TripleCompressor
 	{
+		// force this to always associate with rdf2btd
 		rdf2btd &instance;
 		
 		inline TripleCompressor(rdf2btd &r2d)
@@ -85,42 +82,63 @@ class rdf2btd
 			
 		unsigned int operator() (std::string s)
 		{
-			return this->instance.dict->insert(s);
+			if (this->instance.dict != nullptr)
+			{
+				return this->instance.dict->insert(s);
+			}
+			else
+			{
+				std::cerr << "Could not compress " << s
+					<< " dictionary is invalid.\n";
+				return 0;
+			}
 		}
 	};
 	
 	private:
 	
+		// internal constant and error wrapper / checker
+		static void fatal_err(std::string, int);
+		static void verify_file(std::ifstream &ifs, std::string msg);
 		
+		// the dictionary and several contextual paths
 		Dict *dict;
-		std::string ifile, tfile, ofile;
+		std::string ifile, ofile, tfile;
 		std::string n3parser;
+		
+		// container to store our compressed triples
 		std::vector<CompressedTriple> ctriples;
 
-
-		static void fatal_err(std::string, int);
-		
-		void verify_file(std::ifstream &ifs, std::string msg);
-		
+		// Internal components that make up the conversion process
 		void transform(std::string, std::string);
 		void compress(std::string);
 		
+		// simple binary writer wrapper
 		template <typename T>
 		void writeData(std::ofstream& ofs, T data);
 		
+		// simple binary reader wrapper
 		template <typename T>
 		void readData(std::ifstream& ifs, T *data);
+	
+	protected:
+	
+		// Empty constructor for a program interface
+		rdf2btd();
 		
-	public:
-		rdf2btd(std::string, std::string);
-		~rdf2btd();
-
-		void run();
+		// public functions usable by a program interface
+		//  if more conversions are desired
 		void save(std::string);
 		void load(std::string);
 		
+	public:
 		
+		// Always take an input and output, but default the tmpfile
+		rdf2btd(std::string, std::string, std::string = TMP_FILE);
+		~rdf2btd();
 		
+		// cmd to initiate the program
+		void run();
 
 };
 

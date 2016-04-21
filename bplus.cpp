@@ -23,14 +23,12 @@
 #include <iostream>
 
 // B+ tree's constructor
-// Sets everything to NULL and nothing is allocated
+// Sets everything to nullptr and nothing is allocated
 //  until the first insertion
 template <typename Tkey, typename Tdat>
-Bplus<Tkey, Tdat>::Bplus() 
-{
-	headLeaf = tailLeaf = NULL;
-	root = NULL;
-}
+Bplus<Tkey, Tdat>::Bplus()
+	: root(nullptr), headLeaf(nullptr), tailLeaf(nullptr)
+{ }
 
 // B+ tree's destructor
 // Clears the tree before dipping to dealloacte pointers
@@ -142,7 +140,7 @@ Bplus<Tkey, Tdat>::split_lNodes(
 	newLeaf->slots_used = lNode->slots_used - mid;
 	newLeaf->next = lNode->next;
 	
-	if (newLeaf->next == NULL) 
+	if (newLeaf->next == nullptr) 
 	{
 		this->tailLeaf = newLeaf;
 	}
@@ -212,14 +210,14 @@ Bplus<Tkey, Tdat>::insert_recursive(
 	Node **splitNode) 
 {
 
-	if (N == NULL) 
+	if (N == nullptr) 
 		std::cerr << "Insert recursive: Null Node * found\n";
 	
 	if (!N->isleaf) 
 	{
 		innerNode *iNode = static_cast<innerNode *>(N);
 		Tkey newKey = Tkey();
-		Node *newChild = NULL;
+		Node *newChild = nullptr;
 		
 		int slot = lower_key_idx(N, key);
 		Node *rr = insert_recursive(static_cast<Node *>(iNode->pointers[slot]), key, dat, &newKey, &newChild);
@@ -319,7 +317,7 @@ void
 Bplus<Tkey, Tdat>::printNode(
 	Bplus<Tkey, Tdat>::Node *N)
 {
-	if (!N) return;
+	if (N == nullptr) return;
 	std::cout << "----------------------------------------------\n|";
 	for (int key = 0; key < this->max_slots; ++key) 
 	{
@@ -353,14 +351,14 @@ Bplus<Tkey, Tdat>::printNode(
 //  Once at the leaf Node, it will find the correct index for 
 //  the key maps to. This does not guarentee the pointer
 //  is valid however so our dictionary object must make
-//  a NULL ptr check
+//  a nullptr ptr check
 template <typename Tkey, typename Tdat>
 Tdat * 
 Bplus<Tkey, Tdat>::find(
 	Tkey key) 
 {
 	Node *N = this->root;
-	if (!N) return NULL;
+	if (N == nullptr) return nullptr;
 	
 	while (!N->isleaf) 
 	{
@@ -382,10 +380,10 @@ Bplus<Tkey, Tdat>::insert(
 	Tkey &key, 
 	Tdat &dat) 
 {
-	Node *newChild = NULL;
+	Node *newChild = nullptr;
 	Tkey newKey = Tkey();
 	
-	if (this->root == NULL) 
+	if (this->root == nullptr) 
 	{
 		this->root = new leafNode();
 		this->headLeaf = this->tailLeaf = this->root;
@@ -415,7 +413,7 @@ Bplus<Tkey, Tdat>::remove(
 {
 	if (!this->root) 
 		return remove_result(ok);
-	remove_result rr = remove_recursive(key, this->root, NULL, NULL, NULL, NULL, NULL, 0);
+	remove_result rr = remove_recursive(key, this->root, nullptr, nullptr, nullptr, nullptr, nullptr, 0);
 	return rr;
 }
 
@@ -477,29 +475,29 @@ Bplus<Tkey, Tdat>::remove_recursive(
 		
 		if (lNodeN->isunderflow() && !(lNodeN == this->root && lNodeN->slots_used >= 1))
 		{
-			if (lNodeL == NULL && lNodeR == NULL) 
+			if (lNodeL == nullptr && lNodeR == nullptr) 
 			{
 				delete this->root;
-				this->root = lNodeN = NULL;
-				this->tailLeaf = this->headLeaf = NULL;
+				this->root = lNodeN = nullptr;
+				this->tailLeaf = this->headLeaf = nullptr;
 				
 				return remove_result(ok);
 			}
-			else if ((lNodeL == NULL || lNodeL->isfew()) && (lNodeR == NULL || lNodeR->isfew()))
+			else if ((lNodeL == nullptr || lNodeL->isfew()) && (lNodeR == nullptr || lNodeR->isfew()))
 			{
 				if (LP == P)
 					rr |= merge_lNodes(lNodeL, lNodeN, LP);
 				else
 					rr |= merge_lNodes(lNodeN, lNodeR, RP);
 			}
-			else if ((lNodeL != NULL && lNodeL->isfew()) && (lNodeR != NULL && lNodeR->isfew()))
+			else if ((lNodeL != nullptr && lNodeL->isfew()) && (lNodeR != nullptr && lNodeR->isfew()))
 			{
 				if (RP == P)
 					rr |= shift_lNodeL(lNodeN, lNodeR, RP, p_slot);
 				else
 					rr |= merge_lNodes(lNodeL, lNodeN, LP);
 			}			
-			else if ((lNodeN != NULL && !lNodeN->isfew()) && (lNodeR != NULL && lNodeR->isfew()))
+			else if ((lNodeN != nullptr && !lNodeN->isfew()) && (lNodeR != nullptr && lNodeR->isfew()))
 			{
 				if (LP == P)
 					shift_lNodeR(lNodeL, lNodeN, LP, p_slot - 1);
@@ -537,7 +535,7 @@ Bplus<Tkey, Tdat>::remove_recursive(
 		
 		if (slot == 0)
 		{
-			_L = (L == NULL) ? NULL 
+			_L = (L == nullptr) ? nullptr 
 				: static_cast< Bplus<Tkey, Tdat>::Node * >((static_cast<innerNode *>(L))->pointers[L->slots_used - 1]);
 			_LP = static_cast<Bplus<Tkey, Tdat>::innerNode *>(LP);
 		}
@@ -549,7 +547,7 @@ Bplus<Tkey, Tdat>::remove_recursive(
 		
 		if (slot == iNodeN->slots_used)
 		{
-			_R = (R == NULL) ? NULL 
+			_R = (R == nullptr) ? nullptr 
 				: static_cast< Bplus<Tkey, Tdat>::Node * >((static_cast<innerNode *>(R))->pointers[0]);
 			_RP = static_cast<Bplus<Tkey, Tdat>::innerNode *>(RP);;
 		}
@@ -607,7 +605,7 @@ Bplus<Tkey, Tdat>::remove_recursive(
 		
 		if (iNodeN->isunderflow() && !(iNodeN == this->root && iNodeN->slots_used >= 1))
 		{
-			if (iNodeL == NULL && iNodeR == NULL)
+			if (iNodeL == nullptr && iNodeR == nullptr)
 			{
 				this->root = static_cast< Bplus<Tkey, Tdat>::Node * >(iNodeN->pointers[0]);
 
@@ -616,21 +614,21 @@ Bplus<Tkey, Tdat>::remove_recursive(
 
 				return remove_result(ok);
 			}
-			else if ((iNodeL == NULL || iNodeL->isfew()) && (iNodeR == NULL || iNodeR->isfew()))
+			else if ((iNodeL == nullptr || iNodeL->isfew()) && (iNodeR == nullptr || iNodeR->isfew()))
 			{
 				if (LP == P)
 					rr |= merge_iNodes(iNodeL, iNodeN, LP, p_slot - 1);
 				else
 					rr |= merge_iNodes(iNodeN, iNodeR, RP, p_slot);
 			}
-			else if ((iNodeL != NULL && iNodeL->isfew()) && (iNodeR != NULL && !iNodeR->isfew()))
+			else if ((iNodeL != nullptr && iNodeL->isfew()) && (iNodeR != nullptr && !iNodeR->isfew()))
 			{
 				if (RP == P)
 					shift_iNodeL(iNodeN, iNodeR, RP, p_slot);
 				else
 					rr |= merge_iNodes(iNodeL, iNodeN, LP, p_slot - 1);
 			}
-			else if ((iNodeL != NULL && !iNodeL->isfew()) && (iNodeR != NULL && iNodeR->isfew()))
+			else if ((iNodeL != nullptr && !iNodeL->isfew()) && (iNodeR != nullptr && iNodeR->isfew()))
 			{
 				if (LP == P)
 					shift_iNodeR(iNodeL, iNodeN, LP, p_slot - 1);
@@ -803,7 +801,7 @@ template <typename Tkey, typename Tdat>
 void 
 Bplus<Tkey, Tdat>::clear() 
 {
-	if (this->root)
+	if (this->root != nullptr)
 	{
 		clear_recursive(this->root);
 	}
@@ -815,7 +813,7 @@ template <typename Tkey, typename Tdat>
 void 
 Bplus<Tkey, Tdat>::show() 
 {
-	if (this->root)
+	if (this->root != nullptr)
 	{
 		this->traverse(this->root);
 	}

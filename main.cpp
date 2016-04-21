@@ -27,59 +27,96 @@
 
 #include "rdf2btd.h"
 
+// Dont worry about polluting the namespace here
 using namespace std;
 
-// timer functions to measuer exceution times
-void timeit(void(Dict::*)(void), Dict&);
+// timer function to measure execution times
 void timeit(void(*)(void));
 
-// path utility functions to check cmd line arg files
+// path utility functions to double check 
+//  cmd line argument files
 bool fileExists(string path);
+
+// wrapper that handles extracting lines from
+//  a file given its path
 vector<string> getLinesFrom(string path);
 
-// prototypes to run quick tests
-void runQuickTest_Dict(string path);
-void runQuickTest_Dict2(string path);
+// prototypes to run mini quick tests
+void runQuickTest_D(string path);
+void runQuickTest_0(string path);
+void runQuickTest_1(string path);
+void runQuickTest_2(string path);
 
 // print simple usage error to screen
-void usage_err()
+static void usage()
 {
-	cerr << "Usage: ./main [-h] [-d] [-i infile -o outfile]\n";
+	cerr << "Usage: ./main [-h] [-t0] [-t1] [-t2] [-t3] [-i infile -o outfile]\n";
 	exit(0);
 }
 
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
 int main(int argc, char **argv)
 {
-	std::string ifile = "tests/nTriples.nt";
-	std::string ofile = "tests/nTriples.btd";
+	std::string ifile;
+	std::string ofile;
 	bool iflag = 0, oflag = 0;
 	
+	// arguments are a must
 	if (argc < 1) 
 	{
-		usage_err();
+		usage();
 	}
 	
-	for (int i = 0; i < argc; ++i)
+	// scan the command line flags to determine 
+	// the execution strategy
+	for (int i = 1; i < argc; ++i)
 	{
-		if (strcmp(argv[i], "-d3") == 0)
+		//////////////////////////////////////
+		//
+		// help message flag to get usage
+		//
+		//////////////////////////////////////
+		if (strcmp(argv[i], "-h") == 0) 
 		{
-			runQuickTest_Dict2("tests/linux_dict");
+			usage();
 		}
-		if (strcmp(argv[i], "-d2") == 0)
+		//////////////////////////////////////
+		//
+		// Here are a few provided test cases
+		//
+		//////////////////////////////////////
+		else if (strcmp(argv[i], "-d") == 0)
+		{
+			runQuickTest_D("tests/linux_dict");
+		}
+		else if (strcmp(argv[i], "-t0") == 0)
+		{
+			runQuickTest_0("tests/nTriples.nt");
+		}
+		else if (strcmp(argv[i], "-t1") == 0)
+		{
+			runQuickTest_1("tests/linux_dict");
+		}
+		else if (strcmp(argv[i], "-t2") == 0)
+		{
+			runQuickTest_2("tests/linux_dict");
+		}
+		else if (strcmp(argv[i], "-t3") == 0)
 		{
 			ifile = "tests/nTriples.nt";
 			ofile = "tests/nTriples.btd";
 			iflag = oflag = 1;
 			break;
 		}
-		if (strcmp(argv[i], "-d1") == 0) 
-		{
-			runQuickTest_Dict("tests/linux_dict");
-		}
-		else if (strcmp(argv[i], "-h") == 0) 
-		{
-			usage_err();
-		}
+		//////////////////////////////////////
+		//
+		// If no test case is called, 
+		//  input and output flags must be 
+		//  given otherwise exit
+		//
+		//////////////////////////////////////
 		else if (strcmp(argv[i], "-i") == 0)
 		{
 			if (++i < argc)
@@ -87,7 +124,7 @@ int main(int argc, char **argv)
 				iflag = 1;
 				ifile = argv[i];
 			} 
-			else usage_err();
+			else usage();
 		}
 		else if (strcmp(argv[i], "-o") == 0)
 		{
@@ -96,40 +133,43 @@ int main(int argc, char **argv)
 				oflag = 1;
 				ofile = argv[i];
 			} 
-			else usage_err();
+			else usage();
+		}
+		else
+		{
+			cerr << "Warning: Ignoring flag " << argv[i]
+				<< endl;
 		}
 	}
 
+	// If we are here, then the standard usage [-i in -o out]
+	//  is assumed. Ensure that file arguments were provided
 	if (!(iflag && oflag))
 	{
-		cerr << "Please specify both input and output files. . .\nExiting.\n";
+		cerr << "Missing file arguments\n";
 		exit(0);
 	}
 	else if (!fileExists(ifile))
 	{
+		// Dont bother trying to run rdfbtd on bad file paths
+		//  (Even though it should handle it in theory)
 		exit(0);
 	}
 	
-	
 	// We have both -i and -o files and will run the converter over it
-	std::cout << "Building rdf2btd converter using" << ifile 
-		<< " to produce " << ofile << "\n";
+	std::cerr << "Building rdf2btd converter" 
+		<< "\n\tinput: " << ifile << "\n\toutput: " << ofile 
+		<< "\n\n";
+	
+	// Build the core program and launch it
 	rdf2btd Converter(ifile, ofile);
 	Converter.run();
 	
+	
+	std::cout << "\nNo crash!\n";
 	return 0;
 }
 
-
-// Utility for timing
-void timeit(void(Dict::*fptr)(void), Dict &D)
-{
-	clock_t beg = clock();
-	(D.*fptr)();
-	clock_t res = clock() - beg;
-	float result = ((float)res) / CLOCKS_PER_SEC;
-	std::cout << "\n" << result << "s\n";
-}
 
 // Utility for timing
 void timeit(void(*fptr)(void))
@@ -156,7 +196,7 @@ bool fileExists(string path)
 	return true;
 }
 
-// Utility for checking file exists
+// Wrapper that extracts all lines from a file
 vector<string> getLinesFrom(string path)
 {
 	string line;
@@ -172,87 +212,77 @@ vector<string> getLinesFrom(string path)
 	return lines;
 }
 
-
-void runQuickTest_Dict(string path)
-{
-	unsigned int i = 0;
-	if (!fileExists(path)) return;
+// First test case which simply tries to build
+//  a dictionary with a file of words 
+void runQuickTest_D(string path)
+{	
+	if (!fileExists(path)) 
+	{
+		exit(-1);
+	}
+	
 	Dict *D = new Dict();
 	vector<string> dat = getLinesFrom(path);
 	vector<unsigned int> ids;
-	cout << "Beginning simple dictionary object test . . .\nLoading . . .\n";
+	
+	cout << "Test case for the linux dictionary file\n"
+		<< "(contains about 50000 words)\n\n";
+	
+	// Populate the dictionary
 	for (auto str : dat)
 	{
 		ids.push_back(D->insert(str));
 	}
-	cout << "Testing Locate(string) and Extract(id) for simple dictionary . . .\n";
-	for (auto str : dat)
+	
+	cout << "Dictionary population successful\n";
+	
+	// output a sensible fraction of results
+	for (unsigned int i = 1; i < dat.size(); ++i)
 	{
-		if (rand() % (int) (1 + (dat.size() / 1000)))
+		if (rand() % 500 == 0)
 		{
-			cout << "Locate(" << str << "): " << D->locate(str) << endl;
-			cout << "Extract(" << i << "): " << D->extract(i) << endl;
-			if (!D->extract(i).compare(str))
-			{
-				cout << "\tGOOD\n";
-			}
-			else
-			{
-				cout << "\tBAD\n";
-			}
+			// test that loc / ext correspond to each other
+			string &str = dat[i];
+			cout << "loc: " << D->locate(str) << " : " << str << endl;
+			cout << "ext: " << i << " : " << D->extract(i) << endl;
+			cout << endl;
 		}
-		++i;
 	}
 	
-	cout << "Testing dictionary serialization to tests/serialize.test\n";
+	cout << "Testing serialization\n"
+		<< "Destination: tests/serialize.test\n\n";
 	
+	// Attempt serialization
 	D->serialize("tests/serialize.test");
+	cout << "Done\n";
 	
+	cout << "Testing DEserialization\n"
+		<< "Source: tests/serialize.test\n\n";
 	
-	// cout << "Done\n\nTesting dictionary deserialization from tests/serialize.test\n";
-	// D->deserialize("tests/serialize.test");
-	// cout << "Done.\n";
-}
-
-
-void runQuickTest_Dict2(string path)
-{
-	unsigned int i = 0;
-	if (!fileExists(path)) return;
-	Dict *D = new Dict();
-	vector<string> dat = getLinesFrom(path);
-	vector<unsigned int> ids;
-	cout << "Beginning simple dictionary object test . . .\nLoading . . .\n";
-	for (auto str : dat)
-	{
-		ids.push_back(D->insert(str));
-	}
-	cout << "Testing Locate(string) and Extract(id) for simple dictionary . . .\n";
-	for (auto str : dat)
-	{
-		if (rand() % (int) (1 + (dat.size() / 1000)))
-		{
-			cout << "Locate(" << str << "): " << D->locate(str) << endl;
-			cout << "Extract(" << i << "): " << D->extract(i) << endl;
-			if (!D->extract(i).compare(str))
-			{
-				cout << "\tGOOD\n";
-			}
-			else
-			{
-				cout << "\tBAD\n";
-			}
-		}
-		++i;
-	}
-	
-	cout << "Testing dictionary serialization to tests/serialize.test\n";
-	
-	D->serialize("tests/serialize.test");
-	
-	
-	cout << "Done\n\nTesting dictionary deserialization from tests/serialize.test\n";
+	// Attempt deserialization
 	D->deserialize("tests/serialize.test");
 	cout << "Done.\n";
 }
 
+// template for tests
+void runQuickTest_0(string ifile)
+{
+	string ofile = ifile + ".out";
+	// Build the core program and launch it
+	rdf2btd Converter(ifile, ofile);
+	Converter.run();	
+	
+	exit(0);
+}
+
+void runQuickTest_1(string path)
+{
+	cout << "Not a test case yet\n";
+	exit(0);
+}
+
+void runQuickTest_2(string path)
+{
+	cout << "Not a test case yet\n";
+	exit(0);
+}

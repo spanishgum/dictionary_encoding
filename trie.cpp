@@ -19,27 +19,30 @@
 */
 
 #define DEBUG true
+#define DEFAULT_OUT "tests/output.trie"
 
 #include "trie.h"
+
+
 
 /* Function will be used as a constructor for Trie where the input is de-serialized*/
 Trie::Trie()
 {
-	this->root = new Node();
-	this->save_file = "";
+	this->root = new Trie::Node();
+	this->save_file = DEFAULT_OUT;
 }
 
 /* Function will be used as a constructor for Trie where the input is de-serialized*/
 Trie::Trie(std::string ofile)
 {
-	this->root = new Node();
+	this->root = new Trie::Node();
 	this->save_file = ofile;
 }
 
 /* Function will be used as a constructor for Trie where the input is de-serialized*/
 Trie::Trie(std::string ifile, std::string ofile)
 {
-	this->root = new Node();
+	this->root = new Trie::Node();
 	this->save_file = ofile;
 	if (this->fileExists(ifile))
 		this->deserialize(ifile);
@@ -69,7 +72,7 @@ bool Trie::fileExists(std::string path)
 /* Function will traverse to form the Trie tree */
 void Trie::traverse(Trie::Node *N, std::string s) 
 {
-	if (!N) return;
+	if (N == nullptr) return;
 	std::list<Trie::Node *>::iterator I = N->children.begin();
 	
 	std::cout << N->letter << std::endl;
@@ -88,7 +91,7 @@ void Trie::traverse(Trie::Node *N, std::string s)
 /* Function will go through the trie tree and delete the children recursively*/
 void Trie::clear_recursive(Trie::Node *N) 
 {
-	if (!N) return;
+	if (N == nullptr) return;
 	typedef typename std::list<Trie::Node *>::iterator itr;
 	for (itr I = N->children.begin(); I != N->children.end(); ++I)
 		clear_recursive(*I);
@@ -101,6 +104,7 @@ which is a Node*/
 Trie::Node *Trie::find(std::string s) 
 {
 	Trie::Node *N = this->root;
+	if (N == nullptr) return nullptr;
 	std::list<Trie::Node *>::iterator I = N->children.begin();
 	bool match = 0;
 
@@ -121,7 +125,7 @@ Trie::Node *Trie::find(std::string s)
 			++I;			
 		}
 		if (!match) 
-			return NULL;
+			return nullptr;
 		match = 0;
 	}
 	
@@ -137,6 +141,10 @@ Trie with a given ID. Return Node. */
 Trie::Node *Trie::insert(std::string s, unsigned int id) 
 {
 	Trie::Node *N = this->root;
+	if (N == nullptr)
+	{
+		return nullptr;
+	}
 	std::list<Trie::Node *>::iterator I = N->children.begin();
 	bool match = 0;
 	int idx = 0;
@@ -189,6 +197,10 @@ Trie with a given ID. Return Node. */
 void Trie::insert(std::string s) 
  {
  	Trie::Node *N = this->root;
+	if (N == nullptr)
+	{
+		return;
+	}
 	std::list<Trie::Node *>::iterator I = N->children.begin();
 	bool match = 0;
 	int idx = 0;
@@ -227,6 +239,7 @@ void Trie::insert(std::string s)
 	}
 	
 	N->isWord = true;	
+	N->id = 0;	
  }
 
  /* Function finds the string. Then it will check to see if the node is empty 
@@ -238,7 +251,7 @@ void Trie::remove(std::string s)
 {
 	Trie::Node *N = this->find(s), *_N;
 	
-	if (N == NULL || N == this->root) 
+	if (N == nullptr || N == this->root) 
 		return;
 	
 	N->isWord = false;
@@ -263,9 +276,13 @@ void Trie::remove(std::string s)
 bool Trie::contains(std::string s) 
 {
 	Trie::Node *N = find(s);
-	if (N != NULL && N != this->root)
+	if (N != nullptr && N != this->root)
+	{
 		if (N->isWord) 
+		{
 			return true;
+		}
+	}
 	return false;
 }
 
@@ -276,13 +293,22 @@ std::string Trie::getString(Node * N)
 {
 	std::string reverse = "";
 	
-	if (N == NULL) 
-		return "";
+	if (N == nullptr)
+	{
+		return reverse;
+	}
 	if (!N->isWord) 
-		return "";
+	{
+		return reverse;
+	}
 	
 	while (N != this->root) 
 	{
+		if (N == nullptr)
+		{
+			std::cerr << "Fatal Error: Broken link to parent in Trie\n";
+			exit(-1);
+		}
 		reverse += N->letter;
 		N = N->parent;
 	}
@@ -304,6 +330,15 @@ void Trie::show()
 {
 	traverse(this->root, "");
 }
+
+///////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
+
+/////////////// FUNCTIONS BELOW ARE USED FOR SERIALIZTION /////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
+
 
  /* Function will open a file and write the root info into the file in binary*/
 void Trie::serialize(std::string ofile) 
@@ -352,22 +387,24 @@ void Trie::writeNode(std::ofstream& ofs, Node *N)
 	writeData(ofs, N->isWord);
 	writeData(ofs, nChildren);
 	
-	std::cout << N->id << "|" 
-		<< N->letter << "|" 
-		<< N->isWord << "|" 
-		<< N->children.size()<< "\n";
-	
 	for (auto child : N->children)
 		writeNode(ofs, child);
 }
 
  /* Function will open the file and read the information from the file in 
  binary*/
-void Trie::deserialize(std::string ifile) 
+void Trie::deserialize(std::string ifile)
 {
+	// first clear the current tree and then reset the root
+	this->clear();
+	if (this->root == nullptr)
+	{
+		this->root = new Node();
+	}
+
 	std::ifstream ifs;
 	ifs.open(ifile, std::ios::binary);
-	readNode(ifs);
+	readNode(ifs, this->root);
 }
 
 /* Function will read the information from the file stream in
@@ -376,7 +413,7 @@ void Trie::deserialize(std::ifstream& ifs)
 {
 	if (ifs)
 	{
-		readNode(ifs);
+		readNode(ifs, this->root);
 	}
 	else
 	{
@@ -387,8 +424,13 @@ void Trie::deserialize(std::ifstream& ifs)
  /* Function will read the node from the file and reads in the nodes ID, 
  letter, word, and children. After the information is read, that particular
  node is deleted. This continues until all the nodes are read in. */
-void Trie::readNode(std::ifstream& ifs) 
+void Trie::readNode(std::ifstream& ifs, Node *N)
 {
+	if (DEBUG)
+	{
+		std::cerr << "Ignoring invocation of deserialization for debugging.\n";
+		return;
+	}
 	do 
 	{
 		Node *N = new Node();

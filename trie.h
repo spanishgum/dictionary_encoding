@@ -27,20 +27,20 @@
 #include <iostream>
 #include <fstream>
 
-class Trie 
+class Trie
 {
 	public:
-	
 		struct Node 
 		{
 			Node *parent;
-			std::list<Node *> children;
 			char letter;
 			bool isWord;
 			unsigned int id;
+			std::list<Node *> children;
 			
-			inline Node(Node *p = NULL, char c = '\0')
-				: parent(p), letter(c), isWord(0) { }
+			inline Node(Node *p = nullptr, char c = '\0')
+				: parent(p), letter(c), isWord(0), id(0), children() 
+			{ }
 		};
 
 		Node *root;
@@ -61,7 +61,7 @@ class Trie
 		void readData(std::ifstream &, T*);
 
 		void writeNode(std::ofstream&, Node *N);
-		void readNode(std::ifstream&);
+		void readNode(std::ifstream&, Node *N);
 
 	public:
 	

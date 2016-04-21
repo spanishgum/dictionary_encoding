@@ -20,30 +20,33 @@
 
 #include "dictionary.h"
 
+#define DEFAULT_OUT "tests/dict.dat"
 
+
+// Simple default constructor, set size to 1
+//  because 0 is used as an error code
+//  when an operation fails
 Dict::Dict()
+	: size(1), ifile(), ofile(DEFAULT_OUT)
 {
-	this->ifile = "";
-	this->ofile = "";
-	this->size = 0;
 	this->trie = new Trie();
-	this->bplus = new Bplus<unsigned int, Trie::Node>();
+	this->bplus = new Bplus<unsigned int, TNode>();
 }
 
+// An output file is specified for serialization
 Dict::Dict(std::string o)
+	: size(0), ifile(), ofile(o)
 {
-	this->ifile = "";
-	this->ofile = o;
-	this->size = 0;
 	this->trie = new Trie(this->ofile);
-	this->bplus = new Bplus<unsigned int, Trie::Node>();
+	this->bplus = new Bplus<unsigned int, TNode>();
 }
 
+// Both in and outs are specified
+//  For in, we should check that the file exists
+//  If the file does not exists, ignore it
 Dict::Dict(std::string i, std::string o)
+	: size(0), ifile(i), ofile(o)
 {
-	this->ifile = i;
-	this->ofile = o;
-	this->size = 0;
 	if (fileExists(this->ifile))
 	{
 		this->trie = new Trie(this->ifile, this->ofile);
@@ -52,10 +55,10 @@ Dict::Dict(std::string i, std::string o)
 	{
 		this->trie = new Trie(this->ofile);
 	}
-	this->bplus = new Bplus<unsigned int, Trie::Node>();
+	this->bplus = new Bplus<unsigned int, TNode>();
 }
 
-Dict::~Dict() 
+Dict::~Dict()
 {
 	this->clear();
 	if (this->status_good())
@@ -65,25 +68,13 @@ Dict::~Dict()
 	}
 }
 
-// Simple utility to chech if a file exists
-bool Dict::fileExists(std::string path)
-{
-	std::ifstream ifs;
-	ifs.open(path, std::ios::in | std::ios::binary);
-	if (!ifs)
-	{
-		return false;
-	}
-	ifs.close();
-	return true;
-}
 
-void Dict::insert(std::string s, unsigned int id) 
+void Dict::insert(std::string s, unsigned int id)
 {
 	if (this->status_good())
 	{
 		TNode *tn = this->trie->insert(s, id);
-		this->bplus->insert(id, *tn);	
+		this->bplus->insert(id, *tn);
 	}
 }
 
@@ -93,12 +84,15 @@ unsigned int Dict::insert(std::string s)
 	return this->size++;
 }
 
-void Dict::remove(std::string s) 
+void Dict::remove(std::string s)
 {
 	if (this->status_good())
 	{
 		TNode *tn = this->trie->find(s);
-		this->bplus->remove(tn->id);
+		if (tn != nullptr)
+		{
+			this->bplus->remove(tn->id);
+		}
 	}	
 }
 
@@ -108,22 +102,32 @@ void Dict::remove(unsigned int ui)
 	{
 		this->bplus->remove(ui);
 	}
+	// currently does not do anything regarding the trie
+	//  need to find a way to get back the pointer to 
+	//  the it finds (if it finds one)
 }
 
-int Dict::locate(std::string s) 
+// Searches the trie for s
+// If found it returns the ID
+// 0 is reserved as a ItemNotFound indicator
+unsigned int Dict::locate(std::string s) 
 {
-	if (!this->trie) 
+	if (this->trie == nullptr) 
 	{
-		return -1;
+		return 0;
 	}
 	TNode *tn = this->trie->find(s);
-	if (tn == NULL)
+	if (tn == nullptr)
 	{
-		return -1;
-	}		
+		return 0;
+	}
 	return tn->id;
 }
 
+// Search the bplus trie for ID
+// Dont worry about 0,
+//  let the search fail at the benefit
+//  of performance for other searches
 std::string Dict::extract(unsigned int id) 
 {
 	TNode *tn = this->bplus->find(id);
@@ -132,38 +136,64 @@ std::string Dict::extract(unsigned int id)
 
 void Dict::clear() 
 {
-	if (this->bplus)
+	if (this->bplus != nullptr)
 	{
 		this->bplus->clear();
 	}
-	if (this->trie)
+	if (this->trie != nullptr)
 	{
 		this->trie->clear();
 	}
 }
 
+// dictionary will basically show contents of both 
+//  internal structures by calling their show elements
 void Dict::show() 
 {
-	this->bplus->show();
+	std::cout << "\nNum elements: " << this->size << "\n";
+	if (this->bplus != nullptr)
+	{
+		std::cout << "\nBplus contents:\n";
+		this->bplus->show();
+	}
+	if (this->trie != nullptr)
+	{
+		std::cout << "\nTrie contents:\n";
+		this->trie->show();
+	}
 }
 
-
+// (de)serialization methods simply call the trie which handles
+//  everything under the hood
+// Args are taken both as paths or streams
 void Dict::serialize(std::string file)
 {
-	this->trie->serialize(file);
+	if (this->trie != nullptr)
+	{
+		this->trie->serialize(file);
+	}
 }
 
 void Dict::serialize(std::ofstream& ofs)
 {
-	this->trie->serialize(ofs);
+	if (this->trie != nullptr)
+	{
+		this->trie->serialize(ofs);
+	}
 }
 
 void Dict::deserialize(std::string file) 
 {
-	this->trie->deserialize(file);
+	if (this->trie != nullptr)
+	{
+		this->trie->deserialize(file);
+	}
 }
 
 void Dict::deserialize(std::ifstream& ifs) 
 {
-	this->trie->deserialize(ifs);
+	if (this->trie != nullptr)
+	{
+		this->trie->deserialize(ifs);
+	}
 }
