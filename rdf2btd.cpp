@@ -168,7 +168,7 @@ void rdf2btd::transform(std::string _ifile, std::string _tfile)
 void rdf2btd::compress(std::string _tfile)
 {
 	std::ifstream ifs;
-	std::string line_triplet[3];
+	// std::string line_triplet[3];
 	CompressedTriple next_cTriple;
 	TripleCompressor compressTriple(*this);
 	
@@ -176,7 +176,7 @@ void rdf2btd::compress(std::string _tfile)
 	this->dict = new Dict(this->ofile);
 	
 	// parse the lines from the file
-	vector<std::string> modded_file = getLinesFrom(_tfile);
+	std::vector<std::string> modded_file = this->getLinesFrom(_tfile);
 	if (!modded_file.size())
 	{
 		std::cerr << "Fatal Error: Intermediate file lost.\n"
@@ -185,8 +185,9 @@ void rdf2btd::compress(std::string _tfile)
 	}
 
 	// loop over lines
-	for (int i = 0, vector<std::string>::iterator line = modded_file.begin(); 
-		line != modded_file.end(); ++i, ++line) {
+	int i = 0;
+	for (std::vector<std::string>::iterator line = modded_file.begin(); 
+		line != modded_file.end(); ++line, ++i) {
 		
 		next_cTriple.set(static_cast<tri_idx>(i % 3), compressTriple(*line));
 		
@@ -306,11 +307,11 @@ void rdf2btd::load(std::string _ifile)
 }
 
 // simple utility to get all lines from a file stream
-vector<string> getLinesFrom(std::string path)
+std::vector<std::string> rdf2btd::getLinesFrom(std::string path)
 {
-	vector<std::string> data;
+	std::vector<std::string> data;
 	std::ifstream ifs(path);
-	for (std::string line; getline(ifs, line); )
+	for (std::string line; std::getline(ifs, line); )
 	{
 		data.push_back(line);
 	}

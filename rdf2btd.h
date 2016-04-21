@@ -24,6 +24,7 @@
 #include "dictionary.h"
 
 #include <vector>
+#include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/types.h>
@@ -100,12 +101,14 @@ class rdf2btd
 			}
 		}
 	};
+
 	
 	private:
 	
 		// internal constant and error wrapper / checker
 		static void fatal_err(std::string, int);
 		static void verify_file(std::ifstream &ifs, std::string msg);
+		std::vector<std::string> getLinesFrom(std::string path);
 		
 		// the dictionary and several contextual paths
 		Dict *dict;
