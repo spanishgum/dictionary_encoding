@@ -36,7 +36,7 @@ def get_test(i, (l,s)):
 def run_test(i, s, nt):
 	
 	# Print a synopsis of the current test
-	sys.stderr.write('\nTest {:02d} : Size {}\n{}\n\n'.format(i, s, nt))
+	synopsis = '\nTest {:02d} : Size {:>9} : {}\n'.format(i, s, nt)
 	
 	# Get names of test files
 	btd_file = nt + '.btd'
@@ -68,13 +68,14 @@ def run_test(i, s, nt):
 	# calculate compression ratios
 	btd_comp_r = (btd_size / nt_size)
 	hdt_comp_r = (hdt_size / nt_size)
-	
+
 	# Format results into a nice string
-	btd_res = 'BTD\t{:<5} : {:05.1f} : {:08d} : {:4.4f}\n'.format(btd_file, btd_time, btd_size, btd_comp_r)
-	hdt_res = 'HDT\t{:<5} : {:05.1f} : {:08d} : {:4.4f}\n'.format(hdt_file, hdt_time, hdt_size, hdt_comp_r)
+	border = '----------------------------------------------------------------------\n'
+	btd_res = '\tBTD\t{:<5} : {:05.1f} : {:08d} : {:4.4f}\n'.format(btd_file, btd_time, btd_size, btd_comp_r)
+	hdt_res = '\tHDT\t{:<5} : {:05.1f} : {:08d} : {:4.4f}\n'.format(hdt_file, hdt_time, hdt_size, hdt_comp_r)
 	
 	# Record results
-	print btd_res, hdt_res
+	print synopsis, border, btd_res, hdt_res
 	
 
 #
