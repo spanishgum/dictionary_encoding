@@ -2,13 +2,13 @@
 ## A research project on RDF storage compression
 ## by Adam Stallard and Aranya Ajith
 
-COP5725 Advanced Databases Project
-Spring 2016
+###### COP5725 Advanced Databases Project
+###### Spring 2016
 
 ### Ready
 
   > git clone https://github.com/spanishgum/dictionary_encoding
-
+  > pip install rdflib
 
 ### Set
 
@@ -22,7 +22,7 @@ Spring 2016
   > ./main -d2
 
 
-#### Test cases
+### Test cases
 
  * -i in -o out 
 	* Simply link to a '.nt' file for input
@@ -37,7 +37,12 @@ Spring 2016
  * -t1 is the same input as t0, however runs the full scale rdf2btd
 	* This should create a serialized file for the dictionary
 	 
-	 
+
+### data_links.txt
+
+ The python script 'run_tests.py' will step through a series of datasets in the data_links.txt file, asking you if you would like to download it to your tests/ folder. (some may take time - the filesize is provided prior to your answer)
+ If you choose to do so, it will then ask if you would like to initiate the test on it. It makes a system call to the main program, but also to HDT which should be placed one directory lower than dictionary_encoding to work.
+ 
 ## Discussion
 
 Typical RDF storage models implement some form of dictionary encoding to map strings to integers, which promotes efficient query processing and compression. Common implementations involve the use of two way hash maps, tree structures, arrays, etc.
@@ -60,10 +65,10 @@ A big challenge involved creating a persistent file through serialization techni
 
 The dictionary object will encapsulate the Trie and a B+ using unsigned integer keys, and handle linking the two data structures so that a user may call public methods for insertion, removal, and of course the most important methods, Locate and Extract. 
 
-#### Locate(string s)
+## Locate(string s)
   > return a mapped int ID corresponding to s
 
-#### Extract(int i)
+## Extract(int i)
   > return a mapped string corresponding to i
 
 
