@@ -71,8 +71,9 @@ def run_test(i, s, nt):
 
 	# Format results into a nice string
 	border = '--------------------------------------------------------------------------\n'
-	btd_res = ' BTD\t{:<5} : {:05.1f} : {:10d} : {:4.3f}\n'.format(btd_file, btd_time, btd_size, btd_comp_r)
-	hdt_res = ' HDT\t{:<5} : {:05.1f} : {:10d} : {:4.3f}\n'.format(hdt_file, hdt_time, hdt_size, hdt_comp_r)
+	fmt_str = '  BTD  : {:<5} : {:05.1f} : {:10d} : {:4.3f}\n'
+	btd_res = fmt_str.format(btd_file, btd_time, btd_size, btd_comp_r)
+	hdt_res = fmt_str.format(hdt_file, hdt_time, hdt_size, hdt_comp_r)
 	
 	# Record results
 	print synopsis, border, btd_res, hdt_res
