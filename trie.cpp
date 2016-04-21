@@ -351,7 +351,7 @@ void Trie::serialize(std::string ofile)
 // Overload to handle writing to arbitrary output stream
 void Trie::serialize(std::ofstream& ofs) 
 {
-	if (ofs)
+	if (ofs && (this->root != nullptr))
 	{
 		writeNode(ofs, this->root);
 	}
@@ -379,8 +379,11 @@ void Trie::readData(std::ifstream& ifs, T *data)
  children's children*/
 void Trie::writeNode(std::ofstream& ofs, Node *N) 
 {
-	if (!N) return;
-	char nChildren = (char) N->children.size();
+	if (N == nullptr) 
+	{
+		return;
+	}
+	unsigned int nChildren = N->children.size();
 	
 	writeData(ofs, N->id);
 	writeData(ofs, N->letter);

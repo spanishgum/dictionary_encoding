@@ -199,7 +199,7 @@ void rdf2btd::compress(std::string _tfile)
 	}
 	
 	
-	std::cerr << "last value of i" << i << std::endl;
+	std::cerr << "last value of i " << i << std::endl;
 
 	// loop over the line separated S,P,O values
 	//  insert each one into the dictionary and get the mapped value

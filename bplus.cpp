@@ -173,14 +173,16 @@ void
 Bplus<Tkey, Tdat>::clear_recursive(
 	Bplus<Tkey, Tdat>::Node *N) 
 {
-	if (!N)
+	if (N != nullptr)
 		return;
 	else if (N->isleaf) 
 	{
 		Bplus::leafNode *lNode = static_cast<Bplus::leafNode *>(N);
 		for (unsigned int slot = 0; slot < lNode->slots_used; ++slot) 
 		{
-			delete static_cast<Tdat *>(lNode->pointers[slot]);
+			// dont need to delete pointers because these are 
+			//  references to the trie
+			// delete static_cast<Tdat *>(lNode->pointers[slot]);
 		}
 		delete static_cast<Bplus<Tkey, Tdat>::leafNode *>(N);
 	}
@@ -211,7 +213,8 @@ Bplus<Tkey, Tdat>::insert_recursive(
 {
 
 	if (N == nullptr) 
-		std::cerr << "Insert recursive: Null Node * found\n";
+		return nullptr;
+		// std::cerr << "Insert recursive: Null Node * found\n";
 	
 	if (!N->isleaf) 
 	{
