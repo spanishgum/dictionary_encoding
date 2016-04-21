@@ -174,14 +174,6 @@ void Dict::serialize(std::string file)
 	}
 }
 
-void Dict::serialize(std::ofstream& ofs)
-{
-	if (this->trie != nullptr)
-	{
-		this->trie->serialize(ofs);
-	}
-}
-
 void Dict::deserialize(std::string file) 
 {
 	if (this->trie != nullptr)
@@ -190,10 +182,4 @@ void Dict::deserialize(std::string file)
 	}
 }
 
-void Dict::deserialize(std::ifstream& ifs) 
-{
-	if (this->trie != nullptr)
-	{
-		this->trie->deserialize(ifs);
-	}
-}
+

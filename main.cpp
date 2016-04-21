@@ -166,7 +166,7 @@ int main(int argc, char **argv)
 	Converter.run();
 	
 	
-	std::cout << "\nNo crash!\n";
+	std::cout << "\nSuccess!\n";
 	return 0;
 }
 

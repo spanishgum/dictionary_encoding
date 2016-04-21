@@ -85,7 +85,5 @@ class Dict
 		
 		// (de)serialization methods both by streams or paths
 		void serialize(std::string);
-		void serialize(std::ofstream&);
 		void deserialize(std::string);
-		void deserialize(std::ifstream&);
 };

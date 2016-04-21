@@ -32,7 +32,7 @@
 #include <algorithm>
 
 
-#define TMP_FILE "tests/.rdf2btd_tmp"
+#define TMP_FILE "tests/rdf2btd_tmp"
 
 
 class rdf2btd 

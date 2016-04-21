@@ -343,23 +343,10 @@ void Trie::show()
  /* Function will open a file and write the root info into the file in binary*/
 void Trie::serialize(std::string ofile) 
 {
-	std::ofstream ofs;
-	ofs.open(ofile, std::ios::binary);
-	writeNode(ofs, this->root);	
+	this->trie_ostream.open(ofile, std::ios::out | std::ios::binary);
+	writeNode(this->root);	
 }
 
-// Overload to handle writing to arbitrary output stream
-void Trie::serialize(std::ofstream& ofs) 
-{
-	if (ofs && (this->root != nullptr))
-	{
-		writeNode(ofs, this->root);
-	}
-	else
-	{
-		std::cerr << "Warning: Bad stream: Unable to serialize to file.";
-	}
-}
 
  /* Function will write data as well as the size of the data to the file*/
 template <typename T>
@@ -377,7 +364,7 @@ void Trie::readData(std::ifstream& ifs, T *data)
 
  /* Function will write in the file nodes id, letter, word, and children and 
  children's children*/
-void Trie::writeNode(std::ofstream& ofs, Node *N) 
+void Trie::writeNode(Node *N) 
 {
 	if (N == nullptr) 
 	{
@@ -385,13 +372,13 @@ void Trie::writeNode(std::ofstream& ofs, Node *N)
 	}
 	unsigned int nChildren = N->children.size();
 	
-	writeData(ofs, N->id);
-	writeData(ofs, N->letter);
-	writeData(ofs, N->isWord);
-	writeData(ofs, nChildren);
+	writeData<unsigned int>(this->trie_ostream, N->id);
+	writeData<char>(this->trie_ostream, N->letter);
+	writeData<bool>(this->trie_ostream, N->isWord);
+	writeData<unsigned int>(this->trie_ostream, nChildren);
 	
 	for (auto child : N->children)
-		writeNode(ofs, child);
+		writeNode(child);
 }
 
  /* Function will open the file and read the information from the file in 
@@ -406,46 +393,26 @@ void Trie::deserialize(std::string ifile)
 		this->root = new Node();
 	}
 
-	std::ifstream ifs;
-	ifs.open(ifile, std::ios::binary);
-	readNode(ifs, this->root);
+	this->trie_istream.open(ifile, std::ios::in | std::ios::binary);
+	readNode(this->root);
+	this->trie_istream.close();
 }
 
-/* Function will read the information from the file stream in
- binary*/
-void Trie::deserialize(std::ifstream& ifs) 
-{
-	return;
-	if (ifs)
-	{
-		readNode(ifs, this->root);
-	}
-	else
-	{
-		std::cerr << "Warning: Bad stream: Unable to deserialize file.";
-	}
-}
 
  /* Function will read the node from the file and reads in the nodes ID, 
  letter, word, and children. After the information is read, that particular
  node is deleted. This continues until all the nodes are read in. */
-void Trie::readNode(std::ifstream& ifs, Node *N)
+void Trie::readNode(Node *N)
 {
-	return;
-	if (DEBUG)
-	{
-		std::cerr << "Ignoring invocation of deserialization for debugging.\n";
-		return;
-	}
 	do 
 	{
 		Node *N = new Node();
 		char _numChildren;
 	
-		readData(ifs, &N->id);
-		readData(ifs, &N->letter);
-		readData(ifs, &N->isWord);
-		readData(ifs, &_numChildren);
+		readData(this->trie_istream, &N->id);
+		readData(this->trie_istream, &N->letter);
+		readData(this->trie_istream, &N->isWord);
+		readData(this->trie_istream, &_numChildren);
 
 		std::cout << N->id << "|" 
 			<< N->letter << "|" 
@@ -455,5 +422,7 @@ void Trie::readNode(std::ifstream& ifs, Node *N)
 		
 		delete N;
 		
-	} while (ifs);
+	} while (this->trie_istream);
+	// Not recursing right now : this functionality was 
+	//  left out as future work
 }

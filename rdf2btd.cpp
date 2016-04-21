@@ -32,6 +32,7 @@ rdf2btd::rdf2btd(std::string i, std::string o, std::string t)
 	: ifile(i), ofile(o), tfile(t), 
 		n3parser(PY_N3_PARSER), ctriples()
 {
+	
 	this->dict = new Dict(this->ofile);
 	if (!this->dict->fileExists(this->ifile))
 	{
@@ -203,13 +204,13 @@ void rdf2btd::compress(std::string _tfile)
 
 	// loop over the line separated S,P,O values
 	//  insert each one into the dictionary and get the mapped value
-	// for (int i = Subject; i != End; ++i)
-	// {
+	for (int i = Subject; i != End; ++i)
+	{
 		// double check file and get line
 		// verify_file(ifs, "Fatal Error: Intermediate file corruption.");
 		// std::getline(ifs, line_triplet[i]);
 		// next_cTriple.get(static_cast<tri_idx>(i)) = compressor(line_triplet[i]);
-	// }
+	}
 	
 	// show triple count as a statistic
 	std::cout << "Found " << this->ctriples.size() << " triples in " 
@@ -241,10 +242,6 @@ void rdf2btd::save(std::string _ofile)
 	// open an output stream in binary mode
 	std::ofstream ofs;
 	ofs.open(_ofile, std::ios::out | std::ios::binary);
-	this->dict->serialize(_ofile);
-	ofs.close();
-	
-	return; ////////// FOR SOME REASON THIS BROKE :(
 	
 	// first write the number of triples in the header
 	unsigned int num_triples = this->ctriples.size();
@@ -261,10 +258,10 @@ void rdf2btd::save(std::string _ofile)
 			this->writeData(ofs, ctI->get(static_cast<tri_idx>(i)));
 		}
 	}
+	ofs.close();
 	
 	// finally, serialize the dictionary
-	this->dict->serialize(ofs);
-	ofs.close();
+	this->dict->serialize(_ofile);
 }
 
 // Take in a file argument and attempt to load it in
@@ -300,10 +297,10 @@ void rdf2btd::load(std::string _ifile)
 		// push the loaded triple to the triple vector
 		this->ctriples.push_back(ctriple);
 	}
+	ifs.close();
 	
 	// finally, serialize the dictionary
-	this->dict->deserialize(ifs);
-	ifs.close();
+	// this->dict->deserialize(ifs);
 }
 
 // simple utility to get all lines from a file stream

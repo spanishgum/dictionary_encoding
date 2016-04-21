@@ -55,14 +55,17 @@ class Trie
 		Node *find(std::string);
 		Node *insert(std::string, unsigned int);
 
+		std::ofstream trie_ostream;
+		std::ifstream trie_istream;
+		
 		template <typename T>
 		void writeData(std::ofstream &, T);
 
 		template <typename T>
 		void readData(std::ifstream &, T*);
 
-		void writeNode(std::ofstream&, Node *N);
-		void readNode(std::ifstream&, Node *N);
+		void writeNode(Node *N);
+		void readNode(Node *N);
 
 	public:
 	
@@ -81,9 +84,7 @@ class Trie
 		void show();
 
 		void serialize(std::string);
-		void serialize(std::ofstream&);
 		void deserialize(std::string);
-		void deserialize(std::ifstream&);
 };
 
 
