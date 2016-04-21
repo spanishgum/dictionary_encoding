@@ -96,7 +96,6 @@ void Trie::clear_recursive(Trie::Node *N)
 	for (itr I = N->children.begin(); I != N->children.end(); ++I)
 		clear_recursive(*I);
 	N->children.clear();
-	delete N;
 }
 
 /* Function will start at root within the header of Trie tree and go through 
