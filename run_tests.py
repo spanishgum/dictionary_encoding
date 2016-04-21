@@ -51,9 +51,9 @@ def run_test(i, s, nt):
 	
 	# Run the commands
 	t1 = time.time()
-	# os.system(btd)
+	os.system(btd)
 	t2 = time.time()
-	# os.system(hdt)
+	os.system(hdt)
 	t3 = time.time()
 	
 	# Record run times
@@ -66,8 +66,8 @@ def run_test(i, s, nt):
 	hdt_size = os.path.getsize(hdt_file)
 	
 	# calculate compression ratios
-	btd_comp_r = (btd_size / nt_size)
-	hdt_comp_r = (hdt_size / nt_size)
+	btd_comp_r = (float(btd_size) / nt_size)
+	hdt_comp_r = (float(hdt_size) / nt_size)
 
 	# Format results into a nice string
 	border = '--------------------------------------------------------------------------\n'
