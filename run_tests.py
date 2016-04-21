@@ -39,9 +39,8 @@ def run_test(i, s, nt):
 	sys.stderr.write('\nTest {:02d} : Size {}\n{}\n\n'.format(i, s, nt))
 	
 	# Get names of test files
-	base = nt[:-3]
-	btd_file = base + '.btd'
-	hdt_file = base + '.hdt'
+	btd_file = nt + '.btd'
+	hdt_file = nt + '.hdt'
 	
 	# Generate the cmd lines for our program btd and hdt
 	btd = './main -i {} -o {}'.format(nt, btd_file)
