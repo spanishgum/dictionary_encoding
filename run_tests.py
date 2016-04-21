@@ -19,7 +19,6 @@ def main():
 	links.sort(key=lambda x: x[1])
 	for i, (l,s) in enumerate(links):
 		run_test(i, s, get_test(i, (l,s)))
-		break
 		
 	
 def get_size(link):
@@ -37,7 +36,7 @@ def get_test(i, (l,s)):
 def run_test(i, s, t):
 	print 'Test {:02d} : Size {}\n{}\n'.format(i, s, t)
 	btd = './main -i {} -o {}.btd'.format(t, t[:-3])
-	hdt = '../hdt-lib-rc1-src/tools/rdf2hdt -f n3 -i {} -o {}.hdt'.format(t, t[:-3])
+	hdt = '../hdt-lib-rc1-src/tools/rdf2hdt -f n3 {} {}.hdt'.format(t, t[:-3])
 	print 'Hit enter to run:\n\t{}\n\t{}\n'.format(btd, hdt)
 	sys.stdin.readline()
 	os.system(btd)
@@ -48,5 +47,6 @@ def run_test(i, s, t):
 #
 # Call this module as a main program
 if __name__ == '__main__':
-	# sys.stdout = open('results.txt', 'w')
+	sys.stdout = open('results.out', 'w')
+	sys.stderr = open('results.err', 'w')
 	main()
