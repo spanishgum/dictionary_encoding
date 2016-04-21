@@ -17,8 +17,14 @@ def main():
 	links = [(l, int(get_size(l))) for l in open('data_links.txt', 'r')]
 	links.sort(key=lambda x: x[1])
 	for i, (l,s) in enumerate(links):
-		run_test(i, s, get_test(i, (l,s)))
-		sys.stdin.readline()
+		print '{}\n\n\tthis data set has a size of {}\n\tWould you like to download it? [y/n] <- '.format(l, s)
+		response = sys.stdin.readline()
+		if 'y' in [c.lower() for c in response]:
+			dest = get_test(i, (l,s))
+			print '\n\tWould you like to run it? [y/n] <- '
+			response = sys.stdin.readline()
+			if 'y' in [c.lower() for c in response]:
+				run_test(i, s, dest)
 		
 	
 def get_size(link):
