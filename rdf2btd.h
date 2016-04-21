@@ -68,6 +68,12 @@ class rdf2btd
 			return &data[i];
 		}
 		
+		// set an element in data[] by idx
+		void set(tri_idx i, unsigned int u)
+		{
+			data[i] = u;
+		}
+		
 	};
 	
 	// Syntax sugar functor that makes the nullptr check

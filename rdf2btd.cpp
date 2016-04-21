@@ -80,6 +80,7 @@ void rdf2btd::run()
 void rdf2btd::fatal_err(std::string msg, int code)
 {
 	std::cerr << msg << std::endl;
+	std::cerr << strerror(errno) << std::endl;
 	exit(code);
 }
 
@@ -169,27 +170,45 @@ void rdf2btd::compress(std::string _tfile)
 	std::ifstream ifs;
 	std::string line_triplet[3];
 	CompressedTriple next_cTriple;
-	TripleCompressor compressor(*this);
+	TripleCompressor compressTriple(*this);
 	
 	// init the dictionary object
 	this->dict = new Dict(this->ofile);
 	
-	// open and verify the intermediate file before streaming
-	ifs.open(_tfile, std::ios::in);
-	verify_file(ifs, "Fatal Error: Intermediate file lost.");
-	while (ifs)
+	// parse the lines from the file
+	vector<std::string> modded_file = getLinesFrom(_tfile);
+	if (!modded_file.size())
 	{
-		// loop over the line separated S,P,O values
-		//  insert each one into the dictionary and get the mapped value
-		for (int i = Subject; i != End; ++i)
+		std::cerr << "Fatal Error: Intermediate file lost.\n"
+			<< "Could not compress.\n";
+		return;
+	}
+
+	// loop over lines
+	for (int i = 0, vector<std::string>::iterator line = modded_file.begin(); 
+		line != modded_file.end(); ++i, ++line) {
+		
+		next_cTriple.set(static_cast<tri_idx>(i % 3), compressTriple(*line));
+		
+		// once we accumulate a triple, push it
+		if (i % 3 == 2)
 		{
-			// double check file and get line
-			verify_file(ifs, "Fatal Error: Intermediate file corruption.");
-			std::getline(ifs, line_triplet[i]);
-			next_cTriple.get(static_cast<tri_idx>(i)) = compressor(line_triplet[i]);
+			ctriples.push_back(next_cTriple);
 		}
 	}
-	ifs.close();
+	
+	
+	std::cerr << "last value of i" << i << std::endl;
+
+	// loop over the line separated S,P,O values
+	//  insert each one into the dictionary and get the mapped value
+	// for (int i = Subject; i != End; ++i)
+	// {
+		// double check file and get line
+		// verify_file(ifs, "Fatal Error: Intermediate file corruption.");
+		// std::getline(ifs, line_triplet[i]);
+		// next_cTriple.get(static_cast<tri_idx>(i)) = compressor(line_triplet[i]);
+	// }
 	
 	// show triple count as a statistic
 	std::cout << "Found " << this->ctriples.size() << " triples in " 
@@ -286,8 +305,16 @@ void rdf2btd::load(std::string _ifile)
 	ifs.close();
 }
 
-
-	// dict -> .btd
-	// statistics
-	// compare(.nt, .btd+.sop)
+// simple utility to get all lines from a file stream
+vector<string> getLinesFrom(std::string path)
+{
+	vector<std::string> data;
+	std::ifstream ifs(path);
+	for (std::string line; getline(ifs, line); )
+	{
+		data.push_back(line);
+	}
 	
+	return data;
+}
+
