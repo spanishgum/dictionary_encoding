@@ -157,7 +157,7 @@ int main(int argc, char **argv)
 	}
 	
 	// We have both -i and -o files and will run the converter over it
-	std::cerr << "Building rdf2btd converter" 
+	std::cerr << "\n\nBuilding rdf2btd converter" 
 		<< "\n\tinput: " << ifile << "\n\toutput: " << ofile 
 		<< "\n\n";
 	
