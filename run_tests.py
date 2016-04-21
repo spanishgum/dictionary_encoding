@@ -36,7 +36,7 @@ def get_test(i, (l,s)):
 def run_test(i, s, nt):
 	
 	# Print a synopsis of the current test
-	synopsis = '\nTest {:02d} : Size {:>9} : {}\n'.format(i, s, nt)
+	synopsis = '\nTest {:02d} : Size {:>10} KB : {:>35}\n'.format(i, s, nt)
 	
 	# Get names of test files
 	btd_file = nt + '.btd'
