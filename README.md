@@ -28,15 +28,14 @@ Spring 2016
 	* Simply link to a '.nt' file for input
 	 * It will be transformed to an intermediate file
 	 * Then compressed to an output file
- * -d1 is a base test case that uses a linux dictionary file
+ * -d is a base test case that uses a linux dictionary file
 	* This shows an example of where our data structure performs poorly
 	 * The dataset first off is very small
 	 * The nature of the file is that words are very dissimilar
- * -d2 is a base test case that works on "tests/nTriples.nt"
+ * -t0 is a base test case that works on "tests/nTriples.nt"
 	* This shows a case where compression works!
-	 * However, triples are not maintained so this is still yet to be determined
-
- * Functionality for saving Triples is included in the code, but not all bugs are proprly worked out
+ * -t1 is the same input as t0, however runs the full scale rdf2btd
+	* This should create a serialized file for the dictionary
 	 
 	 
 ## Discussion
@@ -48,7 +47,7 @@ This project explores the idea of creating a 2-way hash map to promote:
 * data compression
 * low memory overhead
 
-A big challenge involved creating a presistent file through serialzation techniques. This project did successfully create a method to persist the Trie data structure essentially through a depth first recursion and storing the data in binary format. This file can be read back in at load time.
+A big challenge involved creating a persistent file through serialization techniques. This project did successfully create a method to persist the Trie data structure essentially through a depth first recursion and storing the data in binary format. This file can be read back in at load time.
 * The file that is persisted does not include the original triple structure
 * Rather it simply records the dictionary itself, namely the Trie
  * The B+ tree index is essentially reloaded on the fly and joined to create the full dictionary
@@ -61,11 +60,11 @@ A big challenge involved creating a presistent file through serialzation techniq
 
 The dictionary object will encapsulate the Trie and a B+ using unsigned integer keys, and handle linking the two data structures so that a user may call public methods for insertion, removal, and of course the most important methods, Locate and Extract. 
 
-# Locate(string s)
-### return a mapped int ID corresponding to s
+#### Locate(string s)
+  > return a mapped int ID corresponding to s
 
-# Extract(int i)
-### return a mapped string corresponding to i
+#### Extract(int i)
+  > return a mapped string corresponding to i
 
 
 A primary aim of this project is to test and demonstrate compression for large RDF data sets such as DBpedia

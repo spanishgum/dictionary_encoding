@@ -6,15 +6,19 @@
 *    COP5725 Advanced Databases
 *       Spring 2016
 *
-*    "trie.h"
+*    "main.cpp"
 *
-*     This source file
+* This project explores the idea of creating a 2-way hash map to promote:
+*   2-way search performance
+*   data compression
+*   low memory overhead
 *
+* Large datasets from the DBpedia are be used to challenge our software
+*   so that results can be compared to that of HDT
 *
-*
-*
-*
-*
+* While this project certainly met some level of the goals above,
+*   HDT is a much more mature software solution which employs 
+*   a series of advances techniques which were beyond the scope of this work.
 *
 */
 
@@ -43,14 +47,13 @@ vector<string> getLinesFrom(string path);
 
 // prototypes to run mini quick tests
 void runQuickTest_D(string path);
-void runQuickTest_0(string path);
-void runQuickTest_1(string path);
-void runQuickTest_2(string path);
+void runQuickTest(string path);
+
 
 // print simple usage error to screen
 static void usage()
 {
-	cerr << "Usage: ./main [-h] [-t0] [-t1] [-t2] [-t3] [-i infile -o outfile]\n";
+	cerr << "Usage: ./main [-h] [-d] [-t0] [-t1] [-i infile -o outfile]\n";
 	exit(0);
 }
 
@@ -93,17 +96,9 @@ int main(int argc, char **argv)
 		}
 		else if (strcmp(argv[i], "-t0") == 0)
 		{
-			runQuickTest_0("tests/nTriples.nt");
+			runQuickTest("tests/nTriples.nt");
 		}
 		else if (strcmp(argv[i], "-t1") == 0)
-		{
-			runQuickTest_1("tests/linux_dict");
-		}
-		else if (strcmp(argv[i], "-t2") == 0)
-		{
-			runQuickTest_2("tests/linux_dict");
-		}
-		else if (strcmp(argv[i], "-t3") == 0)
 		{
 			ifile = "tests/nTriples.nt";
 			ofile = "tests/nTriples.btd";
@@ -265,7 +260,7 @@ void runQuickTest_D(string path)
 }
 
 // template for tests
-void runQuickTest_0(string ifile)
+void runQuickTest(string ifile)
 {
 	string ofile = ifile + ".out";
 	// Build the core program and launch it
@@ -275,14 +270,3 @@ void runQuickTest_0(string ifile)
 	exit(0);
 }
 
-void runQuickTest_1(string path)
-{
-	cout << "Not a test case yet\n";
-	exit(0);
-}
-
-void runQuickTest_2(string path)
-{
-	cout << "Not a test case yet\n";
-	exit(0);
-}

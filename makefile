@@ -1,7 +1,10 @@
-##########################################################
 #
-# Best Makefile Ever
-#  Adam Stallard
+# Dictionary encoding 
+#   by Adam Stallard and Aranya Ajith#
+#
+#  COP5725 Advanced Databases
+#  Spring 2016
+#
 #
 ##########################################################
 
@@ -9,9 +12,9 @@ define HEADER
 
    ---------------------------------------------------------
    |                                                       |
-   |              Program XYZ - Version 0.0.0              |
+   |    RDF Storage Compression Comparision Against HDT    |
    |                                                       |
-   |                    Adam Stallard                      |
+   |          by Adam Stallard and Aranya Ajith            |
    |                                                       |
    ---------------------------------------------------------
 

@@ -6,15 +6,19 @@
 *    COP5725 Advanced Databases
 *       Spring 2016
 *
-*    "trie.h"
+*    "bplus.cpp"
 *
-*     This source file
+* This project explores the idea of creating a 2-way hash map to promote:
+*   2-way search performance
+*   data compression
+*   low memory overhead
 *
+* Large datasets from the DBpedia are be used to challenge our software
+*   so that results can be compared to that of HDT
 *
-*
-*
-*
-*
+* While this project certainly met some level of the goals above,
+*   HDT is a much more mature software solution which employs 
+*   a series of advances techniques which were beyond the scope of this work.
 *
 */
 

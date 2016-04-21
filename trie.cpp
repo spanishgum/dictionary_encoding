@@ -6,15 +6,19 @@
 *    COP5725 Advanced Databases
 *       Spring 2016
 *
-*    "trie.h"
+*    "trie.cpp"
 *
-*     This source file
+* This project explores the idea of creating a 2-way hash map to promote:
+*   2-way search performance
+*   data compression
+*   low memory overhead
 *
+* Large datasets from the DBpedia are be used to challenge our software
+*   so that results can be compared to that of HDT
 *
-*
-*
-*
-*
+* While this project certainly met some level of the goals above,
+*   HDT is a much more mature software solution which employs 
+*   a series of advances techniques which were beyond the scope of this work.
 *
 */
 
@@ -22,7 +26,7 @@
 #define DEFAULT_OUT "tests/output.trie"
 
 #include "trie.h"
-
+#include <iomanip>
 
 
 /* Function will be used as a constructor for Trie where the input is de-serialized*/
@@ -404,25 +408,30 @@ void Trie::deserialize(std::string ifile)
  node is deleted. This continues until all the nodes are read in. */
 void Trie::readNode(Node *N)
 {
-	do 
-	{
-		Node *N = new Node();
-		char _numChildren;
+	// This will tell us how many children N should obtain
+	unsigned int _numChildren;
 	
-		readData(this->trie_istream, &N->id);
-		readData(this->trie_istream, &N->letter);
-		readData(this->trie_istream, &N->isWord);
-		readData(this->trie_istream, &_numChildren);
+	// This follows the same exact pattern as the writeNode functionality
+	readData<unsigned int>(this->trie_istream, &N->id);
+	readData<char>(this->trie_istream, &N->letter);
+	readData<bool>(this->trie_istream, &N->isWord);
+	readData<unsigned int>(this->trie_istream, &_numChildren);
 
-		std::cout << N->id << "|" 
-			<< N->letter << "|" 
-			<< N->isWord << "|" 
-			<< (unsigned int) _numChildren 
-			<< "\n";
+	// For now this is simple proof that Nodes are being read properly
+	std::cout << std::setw(10) << N->id << " | " 
+		<< N->letter << " | " 
+		<< (N->isWord ? "*" : " ") << " | " 
+		<< _numChildren << "\n";
+	
+	// Accumulate children according to the count
+	for (unsigned int i = 0; i < _numChildren; ++i)
+	{
+		// create a new child node and assign N as its parent
+		Node *C = new Node(N);
+		N->children.insert(C);
 		
-		delete N;
-		
-	} while (this->trie_istream);
-	// Not recursing right now : this functionality was 
-	//  left out as future work
+		// recurse into the child
+		readNode(C);
+	}
+
 }
